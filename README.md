@@ -58,7 +58,7 @@ The results are visualized through interactive maps and dashboards, making it ea
 
 ## Contributing
 
-We welcome contributions from the community! Please read our [Contributing Guidelines](CONTRIBUTING.md) for more information on how to get involved.
+We welcome contributions from the community.
 
 ## License
 
