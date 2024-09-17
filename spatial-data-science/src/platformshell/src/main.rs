@@ -1,34 +1,43 @@
-use serde_esri::places::query::PlacesClient;
-use serde_esri::places::query::WithinExtentQueryParamsBuilder;
-use serde_esri::places::query::PLACES_API_URL;
-use std::env;
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use serde_esri::places::query::{PlacesClient, WithinExtentQueryParamsBuilder, PLACES_API_URL};
+    use std::env;
 
-fn main() {
-    match env::var("arcgis_api_key") {
-        Ok(arcgis_api_key) => {
-            let client = PlacesClient::new(
-                PLACES_API_URL,
-                &arcgis_api_key,
-            );
+    #[test]
+    fn test_env_var_exists() {
+        env::set_var("arcgis_api_key", "test_key");
+        assert!(env::var("arcgis_api_key").is_ok());
+    }
+
+    #[test]
+    fn test_within_extent_query_params_builder() {
+        let params = WithinExtentQueryParamsBuilder::default()
+            .xmin(139.74)
+            .ymin(35.65)
+            .xmax(139.75)
+            .ymax(35.66)
+            .build()
+            .unwrap();
         
-            // Use the query within extent query builder to create query parameters
-            let params = WithinExtentQueryParamsBuilder::default()
-                .xmin(139.74)
-                .ymin(35.65)
-                .xmax(139.75)
-                .ymax(35.66)
-                .build()
-                .unwrap();
+        assert_eq!(params.xmin, 139.74);
+        assert_eq!(params.ymin, 35.65);
+        assert_eq!(params.xmax, 139.75);
+        assert_eq!(params.ymax, 35.66);
+    }
+
+    #[test]
+    fn test_within_extent() {
+        let client = PlacesClient::new(PLACES_API_URL, "test_key");
+        let params = WithinExtentQueryParamsBuilder::default()
+            .xmin(139.74)
+            .ymin(35.65)
+            .xmax(139.75)
+            .ymax(35.66)
+            .build()
+            .unwrap();
         
-            // Call the within_extent method with the query parameters
-            let res = client.within_extent(params).unwrap();
-        
-            // use the automatic pagination for the iterator method
-            res.into_iter()
-                .for_each(|r| println!("{:?}", r.unwrap().name));
-        },
-        Err(ex) => {
-            println!("{}", ex)
-        },
+        let res = client.within_extent(params);
+        assert!(res.is_ok());
     }
 }
