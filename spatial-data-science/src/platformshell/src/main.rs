@@ -42,3 +42,8 @@ mod tests {
         assert!(res.is_ok());
     }
 }
+
+
+fn main() {
+    // Get your hands dirty
+}
