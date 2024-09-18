@@ -24,6 +24,9 @@ We gather data from various sources, including satellite imagery, weather statio
 
 Using ArcGIS, we apply spatial analysis techniques to identify patterns and correlations between urban features and temperature variations. This helps us pinpoint specific areas that are most susceptible to the UHI effect.
 
+![Screenshot ModelBuilder Heat Risk Index](https://raw.githubusercontent.com/EsriDE/urban-heat-risk-index/main/doc/img/HRI.svg)
+*Screenshot: ModelBuilder Heat Risk Index*
+
 ### Visualization
 
 The results are visualized through interactive maps and dashboards, making it easy for stakeholders to understand the extent and impact of UHIs in their regions.
