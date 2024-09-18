@@ -61,7 +61,7 @@ The results are visualized through interactive maps and dashboards, making it ea
 
 ## Contributing
 
-We welcome contributions from the community.
+We welcome contributions from anyone and everyone. Please see our [guidelines for contributing](CONTRIBUTING.md).
 
 ## License
 
