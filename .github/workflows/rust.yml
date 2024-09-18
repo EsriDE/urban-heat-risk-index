@@ -20,6 +20,8 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     - name: Build
+      working-directory: ./spatial-data-science/src/platformshell
       run: cargo build --verbose
     - name: Run tests
+      working-directory: ./spatial-data-science/src/platformshell
       run: cargo test --verbose
