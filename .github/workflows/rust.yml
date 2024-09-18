@@ -20,6 +20,10 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     - name: Build
+      working-directory: ./spatial-data-science/src/platformshell
       run: cargo build --verbose
     - name: Run tests
+      working-directory: ./spatial-data-science/src/platformshell
+      env:
+        arcgis_api_key: ${{ secrets.ARCGIS_API_KEY }}
       run: cargo test --verbose
