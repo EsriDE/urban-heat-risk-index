@@ -29,12 +29,14 @@ mod tests {
 
     #[test]
     fn test_within_extent() {
-        let client = PlacesClient::new(PLACES_API_URL, "test_key");
+        let arcgis_api_key = env::var("arcgis_api_key").unwrap();
+        let client = PlacesClient::new(PLACES_API_URL, &arcgis_api_key);
         let params = WithinExtentQueryParamsBuilder::default()
-            .xmin(139.74)
-            .ymin(35.65)
-            .xmax(139.75)
-            .ymax(35.66)
+            .xmin(-0.0765)
+            .ymin(51.4945)
+            .xmax(0.0364)
+            .ymax(51.5254)
+            .category_ids(vec!["17117".to_string()])
             .build()
             .unwrap();
         
