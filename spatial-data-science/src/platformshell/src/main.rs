@@ -1,6 +1,11 @@
+use reqwest::Url;
+use std::env;
+use std::io::Read;
+
+
+
 #[cfg(test)]
 mod tests {
-    use super::*;
     use serde_esri::places::query::{PlacesClient, WithinExtentQueryParamsBuilder, PLACES_API_URL};
     use std::env;
 
@@ -46,6 +51,25 @@ mod tests {
 }
 
 
-fn main() {
-    // Get your hands dirty
+fn main() -> Result<(), Box<dyn std::error::Error>> {
+    let urban_hri_url = env::var("URBAN_HEAT_RISK_INDEX_FEATURE_SERVICE_URL")?;
+    let query_url = Url::parse_with_params(
+        &(urban_hri_url + "/query"),
+        &[
+            ("where", "1=1"),
+            ("outFields", "*"),
+            ("returnGeometry", "true"),
+            ("resultRecordCount", "5"),
+            ("f", "json"),
+        ],
+    )?;
+    let mut response = reqwest::blocking::get(query_url)?;
+    let mut body = String::new();
+
+    // Read the request into a String
+    response.read_to_string(&mut body)?;
+
+    println!("{:?}", body);
+
+    Ok(())
 }
