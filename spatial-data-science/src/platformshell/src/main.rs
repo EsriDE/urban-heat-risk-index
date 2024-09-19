@@ -1,4 +1,6 @@
 use reqwest::Url;
+use serde_esri::features::FeatureSet;
+use serde_json::json;
 use std::env;
 use std::io::Read;
 
@@ -69,7 +71,22 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Read the request into a String
     response.read_to_string(&mut body)?;
 
-    println!("{:?}", body);
+    //println!("{:?}", body);
+
+    // Parse into a 2D FeatureSet
+    let hri_featureset: FeatureSet<2> = serde_json::from_str(&body)?;
+
+     // Extract and print the JSON representation of the geometries
+     for hri_feature in hri_featureset.features {
+        if let Some(hri_geometry) = hri_feature.geometry {
+            if let Some(polygon) = hri_geometry.as_polygon() {
+                let json_geometry = json!(polygon);
+                println!("{}", serde_json::to_string_pretty(&json_geometry)?);
+            } else {
+                eprintln!("Geometry is not a polygon.");
+            }
+        }
+    }
 
     Ok(())
 }
