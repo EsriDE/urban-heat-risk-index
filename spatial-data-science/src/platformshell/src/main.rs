@@ -1,3 +1,4 @@
+use geo::Point;
 use reqwest::Url;
 use serde_esri::features::FeatureSet;
 use serde_json::json;
@@ -54,14 +55,22 @@ mod tests {
 
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
+    // Create a Point with latitude and longitude
+    let location = Point::new(7.116004, 50.719847);
+    let location_str = format!("{}, {}", location.x(), location.y());
+    let location_wkid_str = "4326";
+
+    // Query the feature service
     let urban_hri_url = env::var("URBAN_HEAT_RISK_INDEX_FEATURE_SERVICE_URL")?;
     let query_url = Url::parse_with_params(
         &(urban_hri_url + "/query"),
         &[
             ("where", "1=1"),
-            ("outFields", "*"),
+            ("geometryType", "esriGeometryPoint"),
+            ("geometry", &location_str),
+            ("inSR", &location_wkid_str),
+            ("outFields", "*"),            
             ("returnGeometry", "true"),
-            ("resultRecordCount", "5"),
             ("f", "json"),
         ],
     )?;
