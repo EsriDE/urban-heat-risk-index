@@ -1,5 +1,7 @@
 import arcpy
 from arcpy.sa import *
+from arcpy import Extent
+from arcpy import SpatialReference
 from sys import argv
 
 def initialize_arcpy():
@@ -76,22 +78,28 @@ def standardize_field(in_table, fields, method="MIN-MAX", min_value=1, max_value
         max_value=max_value
     )
 
-def delete_features(in_features):
-    """ Delete features from a feature class or layer. """
-    arcpy.management.DeleteFeatures(in_features=in_features)
+#def delete_features(in_features):
+#    """ Delete features from a feature class or layer. """
+#    arcpy.management.DeleteFeatures(in_features=in_features)
 
-def hri_main(land_cover, zensus_2022):
+def hri_main(land_cover, zensus_2022, extent, spatial_reference, workspace=None):
     """ Main function to execute the HRI analysis. """
     initialize_arcpy()
-    
+
+    if workspace is None: 
+        arcpy.env.workspace = arcpy.env.scratchGDB
+    else: 
+        arcpy.env.workspace = workspace
+  
     # Generate tessellation
     tessellation_output = "HRI_Hexagone"
     generate_tessellation(
         output_feature_class=tessellation_output, 
-        extent="781745.292120143 6556576.21979931 802689.19726414 6581479.0533047",
+        extent=extent,
         size="1500 SquareMeters",
-        spatial_ref="PROJCS[\"WGS_1984_Web_Mercator_Auxiliary_Sphere\",GEOGCS[\"GCS_WGS_1984\",...]"
+        spatial_ref=spatial_reference
     )
+    return
 
     # Spatial join
     spatial_join_output = "HRI_Hexagone_SpatialJoin1"
@@ -145,15 +153,24 @@ def hri_main(land_cover, zensus_2022):
     calculate_field(spatial_join_output, "HRI", "Sum($feature.TEMP_MAX_MIN_MAX, $feature.PCT_Lacking_MIN_MAX, $feature.Einwohner_MIN_MAX)", field_type="FLOAT")
 
     # Select layer by location
-    arcpy.management.SelectLayerByLocation(
-        in_layer=[spatial_join_output],
-        overlap_type="WITHIN",
-        select_features="Ortsteile_Bonn",
-        invert_spatial_relationship="INVERT"
-    )
+  #  arcpy.management.SelectLayerByLocation(
+  #      in_layer=[spatial_join_output],
+  #      overlap_type="WITHIN",
+  #      select_features="Ortsteile_Bonn",
+  #      invert_spatial_relationship="INVERT"
+  #  )
 
     # Delete features not in Bonn
-    delete_features(spatial_join_output)
+   # delete_features(spatial_join_output)
 
 if __name__ == '__main__':
-    hri_main(*argv[1:])
+    #hri_main(*argv[1:])
+    land_cover = "https://tiledimageservices.arcgis.com/P3ePLMYs2RVChkJx/arcgis/rest/services/European_Space_Agency_WorldCover_2021_Land_Cover_WGS84_7/ImageServer"
+    zensus_2022 = "https://services2.arcgis.com/jUpNdisbWqRpMo35/arcgis/rest/services/Zensus2022_grid_final/FeatureServer/0"
+    spatial_reference = SpatialReference(102100)
+    extent = Extent(XMin=788871.95069623261, YMin=6576847.6816084972, XMax=790779.65876141505, YMax=6577625.2997531621, spatial_reference=spatial_reference)
+    
+
+
+    hri_main(land_cover, zensus_2022, extent, spatial_reference)
+
