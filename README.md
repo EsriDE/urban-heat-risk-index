@@ -44,14 +44,7 @@ The results are visualized through interactive maps and dashboards, making it ea
    ```bash
    git clone https://github.com/EsriDE/urban-heat-risk-index.git
    ```
-2. Navigate to the project directory:
-   ```bash
-   cd urban-heatrisk-index
-   ```
-3. Install the required dependencies:
-   ```bash
-   pip install -r requirements.txt
-   ```
+2. Stay tuned...
 
 ### Usage
 
