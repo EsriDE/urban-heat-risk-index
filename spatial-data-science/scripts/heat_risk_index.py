@@ -7,7 +7,6 @@ def initialize_arcpy():
     arcpy.env.overwriteOutput = True
     arcpy.CheckOutExtension("3D")
     arcpy.CheckOutExtension("spatial")
-    arcpy.CheckOutExtension("ImageExt")
     arcpy.CheckOutExtension("ImageAnalyst")
 
 def generate_tessellation(output_feature_class, extent, size, spatial_ref):
