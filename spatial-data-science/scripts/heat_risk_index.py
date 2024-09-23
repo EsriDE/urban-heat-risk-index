@@ -1,7 +1,9 @@
 import arcpy
+from arcpy.da import SearchCursor
 from arcpy.sa import *
 from arcpy import Extent
 from arcpy import SpatialReference
+import pandas as pd
 from sys import argv
 
 def initialize_arcpy():
@@ -104,11 +106,46 @@ def hri_main(landsat_surf_temp, land_cover, zensus_2022, extent, spatial_referen
     spatial_join_output = "HRI_Hexagone_SpatialJoin1"
     spatial_join(tessellation_output, zensus_2022, spatial_join_output)
     surf_temp_layer = "Landsat Surface Temperature"
-    arcpy.management.MakeImageServerLayer(landsat_surf_temp, surf_temp_layer, processing_template="Band 10 Surface Temperature in Celsius", template=extent)
+    image_server_result = arcpy.management.MakeImageServerLayer(landsat_surf_temp, surf_temp_layer, processing_template="Band 10 Surface Temperature in Celsius", template=extent)
+    landsat_layer = image_server_result.getOutput(0)
+    definition_query = "((Best < 2000000) OR (Name LIKE 'Ov%')) AND (CloudCover < 0.05) AND (Month = 7 OR Month = 8)"
+    landsat_layer.definitionQuery = definition_query
 
-    # Zonal statistics for surface temperature
-    surf_temp_table_output = "surf_temp_max"
-    zonal_statistics(spatial_join_output, "GRID_ID", surf_temp_layer, surf_temp_table_output)
+    landsat_images = []
+    with SearchCursor(landsat_layer, ["OBJECTID","AcquisitionDate"], where_clause=definition_query, spatial_filter=extent) as cursor:
+        for row in cursor:
+            landsat_images.append({"OBJECTID": row[0], "AcquisitionDate": row[1]})
+    
+    landsat_images_df = pd.DataFrame(landsat_images)
+    landsat_images_sorted_df = landsat_images_df.sort_values(by="AcquisitionDate", ascending=False)
+    if landsat_images_sorted_df.empty:
+        raise ValueError("No valid Landsat Image found!")
+    
+    objectid = landsat_images_sorted_df["OBJECTID"][0]
+    landsat_layer.definitionQuery = f"OBJECTID={objectid}"
+
+    landsat_surf_temp_output = "landsat_surf_temp"
+    with arcpy.EnvManager(extent=extent):
+        arcpy.management.CopyRaster(
+            in_raster=landsat_layer,
+            out_rasterdataset=landsat_surf_temp_output,
+            config_keyword="",
+            background_value=None,
+            nodata_value="",
+            onebit_to_eightbit="NONE",
+            colormap_to_RGB="NONE",
+            pixel_type="8_BIT_SIGNED",
+            scale_pixel_value="NONE",
+            RGB_to_Colormap="NONE",
+            format="TIFF",
+            transform="NONE",
+            process_as_multidimensional="CURRENT_SLICE",
+            build_multidimensional_transpose="NO_TRANSPOSE"
+        )
+
+    # Zonal statistics for surface temperature as table
+    surf_temp_table_output = "surf_temp_max_1"
+    zonal_statistics(spatial_join_output, "GRID_ID", landsat_surf_temp_output, surf_temp_table_output)
     return
 
     # Copy raster for tree canopy
@@ -176,4 +213,3 @@ if __name__ == '__main__':
 
 
     hri_main(landsat_surf_temp, land_cover, zensus_2022, extent, spatial_reference)
-
