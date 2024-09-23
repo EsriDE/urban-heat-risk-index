@@ -17,7 +17,7 @@ mod tests {
     #[test]
     fn test_env_var_exists() {
         // Check whether or not an ArcGIS API key was set using the environment
-        env::set_var("arcgis_api_key", "test_key");
+        //env::set_var("arcgis_api_key", "test_key");
         assert!(env::var("arcgis_api_key").is_ok());
     }
 
