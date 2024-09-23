@@ -82,7 +82,7 @@ def standardize_field(in_table, fields, method="MIN-MAX", min_value=1, max_value
 #    """ Delete features from a feature class or layer. """
 #    arcpy.management.DeleteFeatures(in_features=in_features)
 
-def hri_main(land_cover, zensus_2022, extent, spatial_reference, workspace=None):
+def hri_main(landsat_surf_temp, land_cover, zensus_2022, extent, spatial_reference, workspace=None):
     """ Main function to execute the HRI analysis. """
     initialize_arcpy()
 
@@ -99,15 +99,17 @@ def hri_main(land_cover, zensus_2022, extent, spatial_reference, workspace=None)
         size="1500 SquareMeters",
         spatial_ref=spatial_reference
     )
-    return
-
+   
     # Spatial join
     spatial_join_output = "HRI_Hexagone_SpatialJoin1"
     spatial_join(tessellation_output, zensus_2022, spatial_join_output)
+    surf_temp_layer = "Landsat Surface Temperature"
+    arcpy.management.MakeImageServerLayer(landsat_surf_temp, surf_temp_layer, processing_template="Band 10 Surface Temperature in Celsius", template=extent)
 
     # Zonal statistics for surface temperature
-    surf_temp_max = "surf_temp_max"
-    zonal_statistics(spatial_join_output, "GRID_ID", "Multispectral Landsat.tif", surf_temp_max)
+    surf_temp_table_output = "surf_temp_max"
+    zonal_statistics(spatial_join_output, "GRID_ID", surf_temp_layer, surf_temp_table_output)
+    return
 
     # Copy raster for tree canopy
     copy_raster(land_cover, "tree_canopy.tif")
@@ -165,6 +167,7 @@ def hri_main(land_cover, zensus_2022, extent, spatial_reference, workspace=None)
 
 if __name__ == '__main__':
     #hri_main(*argv[1:])
+    landsat_surf_temp = "https://landsat2.arcgis.com/arcgis/rest/services/Landsat/MS/ImageServer"
     land_cover = "https://tiledimageservices.arcgis.com/P3ePLMYs2RVChkJx/arcgis/rest/services/European_Space_Agency_WorldCover_2021_Land_Cover_WGS84_7/ImageServer"
     zensus_2022 = "https://services2.arcgis.com/jUpNdisbWqRpMo35/arcgis/rest/services/Zensus2022_grid_final/FeatureServer/0"
     spatial_reference = SpatialReference(102100)
@@ -172,5 +175,5 @@ if __name__ == '__main__':
     
 
 
-    hri_main(land_cover, zensus_2022, extent, spatial_reference)
+    hri_main(landsat_surf_temp, land_cover, zensus_2022, extent, spatial_reference)
 
