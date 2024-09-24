@@ -1,11 +1,7 @@
 use geo::Point;
 use platformshell::LocationServicesError;
-use reqwest::Url;
-use serde_esri::features::FeatureSet;
-use serde_json::json;
-use serde_json::Value;
+use serde_esri::features::Feature;
 use std::env;
-use std::io::Read;
 
 mod utils;
 
@@ -64,8 +60,17 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     // Query the feature service
     let urban_hri_url = env::var("URBAN_HEAT_RISK_INDEX_FEATURE_SERVICE_URL")?;
+
+    // Define the filtering logic
+    let filter_fn = |feature: &Feature<2>| {
+        if let Some(geometry) = &feature.geometry {
+            geometry.clone().as_polygon().is_some()
+        } else {
+            false
+        }
+    };
     
-    match utils::query_heat_risk_index(urban_hri_url, location) {
+    match utils::query_heat_risk_index(urban_hri_url, location, filter_fn) {
         Ok(hri_featureset) => {
             let json = serde_json::to_string_pretty(&hri_featureset)?;
             println!("{}", json);

@@ -1,14 +1,13 @@
 use geo::Point;
 use platformshell::LocationServicesError;
 use reqwest::Url;
-use serde_esri::features::FeatureSet;
-use serde_json::json;
+use serde_esri::features::{Feature, FeatureSet};
 use serde_json::Value;
 use std::io::Read;
 
 
 
-pub fn query_heat_risk_index(urban_hri_url: String, location: Point) -> Result<FeatureSet<2>, Box<dyn std::error::Error>> {
+pub fn query_heat_risk_index<F>(urban_hri_url: String, location: Point, filter_fn: F) -> Result<FeatureSet<2>, Box<dyn std::error::Error>> where F: Fn(&Feature<2>) -> bool, {
     let location_str = format!("{}, {}", location.x(), location.y());
     let location_wkid_str = "4326";
 
@@ -46,34 +45,24 @@ pub fn query_heat_risk_index(urban_hri_url: String, location: Point) -> Result<F
 
     // Parse into a 2D FeatureSet
     let hri_featureset: FeatureSet<2> = serde_json::from_str(&body)?;
-    let mut filtered_features = Vec::new();
 
-    // Extract and print the JSON representation of the features
-    for hri_feature in &hri_featureset.features {
-        if let Some(hri_attributes) = &hri_feature.attributes {
-            for (key, value) in hri_attributes.iter() {
-                println!("{}: {}", key, value);
-            }
-        }
-        if let Some(hri_geometry) = &hri_feature.geometry {
-            if let Some(polygon) = hri_geometry.clone().as_polygon() {
-                let json_geometry = json!(polygon);
-                filtered_features.push(hri_feature.clone());
-                println!("{}", serde_json::to_string_pretty(&json_geometry)?);
-            } else {
-                //eprintln!("Geometry is not a polygon.");
-                return Err(Box::new(LocationServicesError { code:9999, message:"Geometry is not a polygon.".to_string() }));
-            }
-        }
-    }
+    // Filter features using the provided closure
+    let filtered_features: Vec<Feature<2>> = hri_featureset
+        .features
+        .into_iter()
+        .filter(|feature| filter_fn(feature))
+        .collect();
 
-    Ok(FeatureSet {
-        objectIdFieldName: hri_featureset.objectIdFieldName.clone(),
-        globalIdFieldName: hri_featureset.globalIdFieldName.clone(),
-        displayFieldName: hri_featureset.displayFieldName.clone(),
-        spatialReference: hri_featureset.spatialReference.clone(),
-        geometryType: hri_featureset.geometryType.clone(),
+    // Create a new FeatureSet with the filtered features
+    let filtered_featureset = FeatureSet {
+        objectIdFieldName: hri_featureset.objectIdFieldName,
+        globalIdFieldName: hri_featureset.globalIdFieldName,
+        displayFieldName: hri_featureset.displayFieldName,
+        spatialReference: hri_featureset.spatialReference,
+        geometryType: hri_featureset.geometryType,
         features: filtered_features,
-        fields: hri_featureset.fields.clone(),
-    })
+        fields: hri_featureset.fields,
+    };
+
+    Ok(filtered_featureset)
 }
