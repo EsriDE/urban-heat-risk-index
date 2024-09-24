@@ -55,22 +55,34 @@ mod tests {
 
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    // Create a Point with latitude and longitude
-    let location = Point::new(7.116004, 50.719847);
+    // Create a Point with latitude and longitude 
+    let location = Point::new(7.116108, 50.719725);
 
     // Query the feature service
     let urban_hri_url = env::var("URBAN_HEAT_RISK_INDEX_FEATURE_SERVICE_URL")?;
 
-    // Define the filtering logic
-    let filter_fn = |feature: &Feature<2>| {
+    // Define the filtering logic using polygon geometry
+    let polygon_filter_fn = |feature: &Feature<2>| {
         if let Some(geometry) = &feature.geometry {
             geometry.clone().as_polygon().is_some()
         } else {
             false
         }
     };
+
+    // Define the filtering logic using high HRI value
+    let hri_filter_fn = |feature: &Feature<2>| {
+        if let Some(attributes) = &feature.attributes {
+            if let Some(hri_value) = attributes.get("HRI") {
+                if let Some(hri_value) = hri_value.as_f64() {                    
+                    return hri_value > 7.0;
+                }
+            }
+        }
+        false
+    };
     
-    match utils::query_heat_risk_index(urban_hri_url, location, filter_fn) {
+    match utils::query_heat_risk_index(urban_hri_url, "1=1", location, hri_filter_fn) {
         Ok(hri_featureset) => {
             let json = serde_json::to_string_pretty(&hri_featureset)?;
             println!("{}", json);
