@@ -146,50 +146,57 @@ def hri_main(landsat_surf_temp, land_cover, zensus_2022, extent, spatial_referen
     # Zonal statistics for surface temperature as table
     surf_temp_table_output = "surf_temp_max_1"
     zonal_statistics(spatial_join_output, "GRID_ID", landsat_surf_temp_output, surf_temp_table_output)
-    return
 
     # Copy raster for tree canopy
-    copy_raster(land_cover, "tree_canopy.tif")
+    tree_canopy_output = "tree_canopy"
+    with arcpy.EnvManager(extent=extent):
+        copy_raster(land_cover, tree_canopy_output)
 
     # Reclassify tree canopy raster
-    reclassify_raster("tree_canopy.tif", "10 1;20 0;30 0;40 0;50 0;60 0;70 0;80 0;90 0;95 0;100 0", "reclass_tree_canopy.tif")
+    tree_canopy_reclassify_output = "reclass_tree_canopy"
+    reclassify_raster(tree_canopy_output, "10 1;20 0;30 0;40 0;50 0;60 0;70 0;80 0;90 0;95 0;100 0", tree_canopy_reclassify_output)
 
     # Zonal statistics for reclassified tree canopy
-    tree_canopy_count = "tree_canopy_count"
-    zonal_statistics(spatial_join_output, "GRID_ID", "reclass_tree_canopy.tif", tree_canopy_count, statistics_type="SUM")
+    tree_canopy_table_output = "tree_canopy_count"
+    zonal_statistics(spatial_join_output, "GRID_ID", tree_canopy_reclassify_output, tree_canopy_table_output, statistics_type="SUM")
 
     # Join fields for tree canopy statistics
-    join_field(spatial_join_output, "GRID_ID", tree_canopy_count, "GRID_ID", ["SUM"])
+    join_field(spatial_join_output, "GRID_ID", tree_canopy_table_output, "GRID_ID", ["SUM"])
 
     # Calculate percentage tree cover and lacking
-    calculate_field(tree_canopy_count, "PCT_Tree_Cover", "(!SUM! / !COUNT!) * 100")
-    calculate_field(tree_canopy_count, "PCT_Lacking", "100 - !PCT_Tree_Cover!")
+    calculate_field(tree_canopy_table_output, "PCT_Tree_Cover", "(!SUM! / !COUNT!) * 100")
+    calculate_field(tree_canopy_table_output, "PCT_Lacking", "100 - !PCT_Tree_Cover!")
 
     # Join the fields for surface temperature and tree canopy data
-    join_field(spatial_join_output, "GRID_ID", surf_temp_max, "GRID_ID", ["MAX"])
-    join_field(spatial_join_output, "GRID_ID", tree_canopy_count, "GRID_ID", ["PCT_Tree_Cover", "PCT_Lacking"])
+    join_field(spatial_join_output, "GRID_ID", surf_temp_table_output, "GRID_ID", ["MAX"])
+    join_field(spatial_join_output, "GRID_ID", tree_canopy_table_output, "GRID_ID", ["PCT_Tree_Cover", "PCT_Lacking"])
 
     # Copy raster for built-up area
-    copy_raster(land_cover, "built_up_area.tif")
+    built_up_area_output = "built_up_area"
+    with arcpy.EnvManager(extent=extent):
+        copy_raster(land_cover, built_up_area_output)
 
     # Reclassify built-up area raster
-    reclassify_raster("built_up_area.tif", "10 0;20 0;30 0;40 0;50 1;60 0;70 0;80 0;90 0;95 0;100 0", "reclass_built_up_area.tif")
+    built_up_area_reclassify_output = "reclass_built_up_area"
+    reclassify_raster(built_up_area_output, "10 0;20 0;30 0;40 0;50 1;60 0;70 0;80 0;90 0;95 0;100 0", built_up_area_reclassify_output)
 
     # Zonal statistics for reclassified built-up area
-    built_up_area_count = "built_up_area_count"
-    zonal_statistics(spatial_join_output, "GRID_ID", "reclass_built_up_area.tif", built_up_area_count, statistics_type="SUM")
+    built_up_area_table_output = "built_up_area_count"
+    zonal_statistics(spatial_join_output, "GRID_ID", built_up_area_reclassify_output, built_up_area_table_output, statistics_type="SUM")
 
     # Join the built-up area statistics
-    join_field(spatial_join_output, "GRID_ID", built_up_area_count, "GRID_ID", ["SUM"])
-    calculate_field(built_up_area_count, "PCT_built_up_area", "(!SUM! / !COUNT!) * 100")
-    join_field(spatial_join_output, "GRID_ID", built_up_area_count, "GRID_ID", ["PCT_built_up_area"])
+    join_field(spatial_join_output, "GRID_ID", built_up_area_table_output, "GRID_ID", ["SUM"])
+    calculate_field(built_up_area_table_output, "PCT_built_up_area", "(!SUM! / !COUNT!) * 100")
+    join_field(spatial_join_output, "GRID_ID", built_up_area_table_output, "GRID_ID", ["PCT_built_up_area"])
 
     # Final HRI calculation using standardized values
     standardize_field(
         spatial_join_output,
         [["Einwohner", "Einwohner_MIN_MAX"], ["MAX", "TEMP_MAX_MIN_MAX"], ["PCT_Lacking", "PCT_Lacking_MIN_MAX"]]
     )
-    calculate_field(spatial_join_output, "HRI", "Sum($feature.TEMP_MAX_MIN_MAX, $feature.PCT_Lacking_MIN_MAX, $feature.Einwohner_MIN_MAX)", field_type="FLOAT")
+    field_expression = "!TEMP_MAX_MIN_MAX! + !PCT_Lacking_MIN_MAX! + !Einwohner_MIN_MAX!"
+    #calculate_field(spatial_join_output, "HRI", "Sum($feature.TEMP_MAX_MIN_MAX, $feature.PCT_Lacking_MIN_MAX, $feature.Einwohner_MIN_MAX)", field_type="FLOAT")
+    calculate_field(spatial_join_output, "HRI", field_expression, field_type="FLOAT")
 
     # Select layer by location
   #  arcpy.management.SelectLayerByLocation(
