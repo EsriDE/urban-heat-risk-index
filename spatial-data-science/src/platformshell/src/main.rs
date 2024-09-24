@@ -7,6 +7,8 @@ use serde_json::Value;
 use std::env;
 use std::io::Read;
 
+mod utils;
+
 
 
 #[cfg(test)]
@@ -59,60 +61,18 @@ mod tests {
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Create a Point with latitude and longitude
     let location = Point::new(7.116004, 50.719847);
-    let location_str = format!("{}, {}", location.x(), location.y());
-    let location_wkid_str = "4326";
 
     // Query the feature service
     let urban_hri_url = env::var("URBAN_HEAT_RISK_INDEX_FEATURE_SERVICE_URL")?;
-    let out_fields = "HRI, TEMP";
-    let query_url = Url::parse_with_params(
-        &(urban_hri_url + "/query"),
-        &[
-            ("where", "1=1"),
-            ("geometryType", "esriGeometryPoint"),
-            ("geometry", &location_str),
-            ("inSR", &location_wkid_str),
-            ("outFields", &out_fields),
-            ("returnGeometry", "true"),
-            ("f", "json"),
-        ],
-    )?;
-    let mut response = reqwest::blocking::get(query_url)?;
-    let mut body = String::new();
-
-    // Read the request into a String
-    response.read_to_string(&mut body)?;
-
-    // Parse the response body as JSON
-    let json_body: Value = serde_json::from_str(&body)?;
-
-    // Check if the JSON contains an error
-    if let Some(error) = json_body.get("error") {
-        let code = error.get("code").and_then(Value::as_i64).unwrap_or(0) as i32;
-        let message = error.get("message").and_then(Value::as_str).unwrap_or("Unknown error").to_string();
-        //eprintln!("{}", message);
-        return Err(Box::new(LocationServicesError { code, message }));
-    }
-    //println!("{:?}", body);
-
-    // Parse into a 2D FeatureSet
-    let hri_featureset: FeatureSet<2> = serde_json::from_str(&body)?;
-
-    // Extract and print the JSON representation of the features
-    for hri_feature in hri_featureset.features {
-        if let Some(hri_attributes) = hri_feature.attributes {
-            for (key, value) in hri_attributes.iter() {
-                println!("{}: {}", key, value);
-            }
+    
+    match utils::query_heat_risk_index(urban_hri_url, location) {
+        Ok(hri_featureset) => {
+            let json = serde_json::to_string_pretty(&hri_featureset)?;
+            println!("{}", json);
         }
-        if let Some(hri_geometry) = hri_feature.geometry {
-            if let Some(polygon) = hri_geometry.as_polygon() {
-                let json_geometry = json!(polygon);
-                println!("{}", serde_json::to_string_pretty(&json_geometry)?);
-            } else {
-                //eprintln!("Geometry is not a polygon.");
-                return Err(Box::new(LocationServicesError { code:9999, message:"Geometry is not a polygon.".to_string() }));
-            }
+        Err(e) => {
+            eprintln!("Error querying heat risk index: {}", e);
+            return Err(Box::new(LocationServicesError { code:9999, message:"Error querying heat risk index!".to_string() }));
         }
     }
 
