@@ -22,7 +22,7 @@ We gather data from various sources, including satellite imagery, weather statio
 
 ### Analysis
 
-Using ArcGIS, we apply spatial analysis techniques to identify patterns and correlations between urban features and temperature variations. This helps us pinpoint specific areas that are most susceptible to the UHI effect. By analyzing temperature data, population density, and vulnerability factors, the Heat Risk Index helps to identify areas most at risk during extreme heat events. The tool aims to support local authorities, health agencies, and residents in making informed decisions to mitigate the impact of heatwaves, enhance preparedness, and protect vulnerable communities.
+Using ArcGIS, we apply spatial analysis techniques to identify patterns and correlations between urban features and temperature variations. This helps us pinpoint specific areas that are most susceptible to the UHI effect. By analyzing temperature data, population density, and tree coverage, the Heat Risk Index helps to identify areas most at risk during extreme heat events. The tool aims to support local authorities, health agencies, and residents in making informed decisions to mitigate the impact of heatwaves, enhance preparedness, and protect vulnerable communities.
 
 The calculated index is based on this [Blog](https://www.esri.com/arcgis-blog/products/arcgis-pro/imagery/heat-resilience-planning-part-1/).
 
