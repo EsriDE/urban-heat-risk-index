@@ -8,6 +8,13 @@ Welcome to the **Urban Heat Risk Index** repository! This project aims to raise 
 
 Urban Heat Islands are areas within urban environments that experience significantly higher temperatures than their rural surroundings. This temperature difference is primarily due to human activities, dense infrastructure, and limited vegetation. UHIs can exacerbate heatwaves, increase energy consumption, and negatively impact public health.
 
+## What is Urban Heat Risk Index?
+By analyzing temperature data, population density, and tree coverage, the Heat Risk Index helps to identify areas most at risk during extreme heat events.
+
+The calculated index is based on this [Blog](https://www.esri.com/arcgis-blog/products/arcgis-pro/imagery/heat-resilience-planning-part-1/).
+
+If you are interested in creating and customizing your own index, [this page](https://learn.arcgis.com/en/projects/customize-a-climate-resilience-index/) might be the right place.
+
 ## Project Goals
 
 1. **Raise Awareness**: Educate the public and policymakers about the causes and consequences of Urban Heat Islands.
@@ -22,11 +29,7 @@ We gather data from various sources, including satellite imagery, weather statio
 
 ### Analysis
 
-Using ArcGIS, we apply spatial analysis techniques to identify patterns and correlations between urban features and temperature variations. This helps us pinpoint specific areas that are most susceptible to the UHI effect. By analyzing temperature data, population density, and tree coverage, the Heat Risk Index helps to identify areas most at risk during extreme heat events. The tool aims to support local authorities, health agencies, and residents in making informed decisions to mitigate the impact of heatwaves, enhance preparedness, and protect vulnerable communities.
-
-The calculated index is based on this [Blog](https://www.esri.com/arcgis-blog/products/arcgis-pro/imagery/heat-resilience-planning-part-1/).
-
-If you are interested in creating and customizing your own index, [this page](https://learn.arcgis.com/en/projects/customize-a-climate-resilience-index/) might be the right place.
+Using ArcGIS, we apply spatial analysis techniques to identify patterns and correlations between urban features and temperature variations. This helps us pinpoint specific areas that are most susceptible to the UHI effect.
 
 The following screenshot shows the model to calculate the urban heat risk index based on landsat imagery, landcover and population data.
 
