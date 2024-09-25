@@ -16,6 +16,9 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
+    - name: Install Dependencies
+      working-directory: ./web-apps/urban-sun-safe
+      run: npm install
     - name: Build
       working-directory: ./web-apps/urban-sun-safe
       run: npm run build
