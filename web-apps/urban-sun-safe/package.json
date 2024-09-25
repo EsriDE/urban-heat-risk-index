@@ -1,0 +1,31 @@
+{
+  "name": "arcgis-core-template",
+  "version": "1.0.0",
+  "description": "ArcGIS Maps SDK for JavaScript template using Vite and TypeScript",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/arnofiva/arcgis-core-template"
+  },
+  "author": "Arno Fiva",
+  "scripts": {
+    "start": "vite",
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "serve": "vite preview",
+    "lint": "concurrently --group --prefix none \"npm:lint:*\"",
+    "lint:typecheck": "tsc --noEmit",
+    "lint:prettier": "prettier --write 'src/**/*.{js,jsx,ts,tsx,css,scss}'"
+  },
+  "dependencies": {
+    "@arcgis/core": "4.28",
+    "@esri/calcite-components": "1.9.2"
+  },
+  "devDependencies": {
+    "@types/sortablejs": "^1.15.1",
+    "tslib": "^2.6.2",
+    "typescript": "^5.1.3",
+    "vite": "^4.3.9",
+    "prettier": "^3.0.3",
+    "sass": "^1.63.4"
+  }
+}
