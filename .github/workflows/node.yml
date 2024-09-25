@@ -1,0 +1,21 @@
+name: Node
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./web-apps/urban-sun-safe
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: Build
+      working-directory: ./web-apps/urban-sun-safe
+      run: npm run build
