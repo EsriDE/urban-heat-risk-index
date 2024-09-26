@@ -82,7 +82,20 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         false
     };
     
-    match utils::query_heat_risk_index(urban_hri_url, "1=1", location, hri_filter_fn) {
+    /*
+    match utils::query_heat_risk_index(urban_hri_url, "1=1", Some(location), hri_filter_fn) {
+        Ok(hri_featureset) => {
+            let json = serde_json::to_string_pretty(&hri_featureset)?;
+            println!("{}", json);
+        }
+        Err(e) => {
+            eprintln!("Error querying heat risk index: {}", e);
+            return Err(Box::new(LocationServicesError { code:9999, message:"Error querying heat risk index!".to_string() }));
+        }
+    }
+    */
+
+    match utils::query_heat_risk_index(urban_hri_url, "1=1", None, hri_filter_fn) {
         Ok(hri_featureset) => {
             let json = serde_json::to_string_pretty(&hri_featureset)?;
             println!("{}", json);

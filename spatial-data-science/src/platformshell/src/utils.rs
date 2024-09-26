@@ -7,24 +7,37 @@ use std::io::Read;
 
 
 
-pub fn query_heat_risk_index<F>(urban_hri_url: String, where_clause: &str, location: Point, filter_fn: F) -> Result<FeatureSet<2>, Box<dyn std::error::Error>> where F: Fn(&Feature<2>) -> bool, {
-    let location_str = format!("{}, {}", location.x(), location.y());
-    let location_wkid_str = "4326";
-
+pub fn query_heat_risk_index<F>(urban_hri_url: String, where_clause: &str, location: Option<Point>, filter_fn: F) -> Result<FeatureSet<2>, Box<dyn std::error::Error>> where F: Fn(&Feature<2>) -> bool, {   
     // Query the feature service
+    let query_url;
     let out_fields = "HRI, TEMP";
-    let query_url = Url::parse_with_params(
-        &(urban_hri_url + "/query"),
-        &[
-            ("where", where_clause),
-            ("geometryType", "esriGeometryPoint"),
-            ("geometry", &location_str),
-            ("inSR", &location_wkid_str),
-            ("outFields", &out_fields),
-            ("returnGeometry", "true"),
-            ("f", "json"),
-        ],
-    )?;
+    if let Some(spatial_filter_location) = location {
+        let location_str = format!("{}, {}", spatial_filter_location.x(), spatial_filter_location.y());
+        let location_wkid_str = "4326";
+
+        query_url = Url::parse_with_params(
+            &(urban_hri_url + "/query"),
+            &[
+                ("where", where_clause),
+                ("geometryType", "esriGeometryPoint"),
+                ("geometry", &location_str),
+                ("inSR", &location_wkid_str),
+                ("outFields", &out_fields),
+                ("returnGeometry", "true"),
+                ("f", "json"),
+            ],
+        )?;
+    } else {
+        query_url = Url::parse_with_params(
+            &(urban_hri_url + "/query"),
+            &[
+                ("where", where_clause),
+                ("outFields", &out_fields),
+                ("returnGeometry", "true"),
+                ("f", "json"),
+            ],
+        )?;
+    }
     let mut response = reqwest::blocking::get(query_url)?;
     let mut body = String::new();
 
