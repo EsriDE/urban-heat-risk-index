@@ -5,6 +5,9 @@ build-backend = 'setuptools.build_meta'
 [tool.setuptools.packages.find]
 include = ['heatri']
 
+[tool.setuptools.package-data]
+heatri = ['data/*.json']
+
 [project]
 name = 'heatri'
 version = '0.1a'

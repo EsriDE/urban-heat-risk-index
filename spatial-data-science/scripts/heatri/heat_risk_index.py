@@ -197,8 +197,8 @@ def hri_main(landsat_surf_temp, land_cover, zensus_2022, extent, spatial_referen
     )
     field_expression = "!TEMP_MAX_MIN_MAX! + !PCT_Lacking_MIN_MAX! + !Einwohner_MIN_MAX!"
     #calculate_field(spatial_join_output, "HRI", "Sum($feature.TEMP_MAX_MIN_MAX, $feature.PCT_Lacking_MIN_MAX, $feature.Einwohner_MIN_MAX)", field_type="FLOAT")
-    gp_result = calculate_field(spatial_join_output, "HRI", field_expression, field_type="FLOAT")
-    return gp_result.getOutput(0)
+    calculate_field(spatial_join_output, "HRI", field_expression, field_type="FLOAT")
+    return f"{arcpy.env.workspace}/{spatial_join_output}"
 
     # Select layer by location
   #  arcpy.management.SelectLayerByLocation(
