@@ -32,6 +32,10 @@ bld/
 [Oo]bj/
 [Ll]og/
 [Ll]ogs/
+*.egg-info/
+
+# Jupyter notebooks checkpoints
+.ipynb_checkpoints/
 
 # Visual Studio 2015/2017 cache/options directory
 .vs/

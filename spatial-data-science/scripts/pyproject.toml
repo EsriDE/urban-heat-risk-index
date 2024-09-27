@@ -1,0 +1,24 @@
+[build-system]
+requires = ['setuptools', 'setuptools-scm']
+build-backend = 'setuptools.build_meta'
+
+[tool.setuptools.packages.find]
+include = ['heatri']
+
+[project]
+name = 'heatri'
+version = '0.1a'
+description = 'Calculates the heat risk index for a geographic region.'
+readme = 'README.md'
+requires-python = '>=3.11'
+keywords = ['urban', 'heat']
+classifiers = [
+    'Programming Language :: Python :: 3',
+    'License :: OSI Approved :: Apache Software License',
+    'Operating System :: OS Independent',
+]
+dependencies = ['arcgis>=2.3']
+
+[project.urls]
+'Homepage' = 'https://www.esri.de'
+'GitHub' = 'https://github.com/EsriDE/urban-heat-risk-index'
