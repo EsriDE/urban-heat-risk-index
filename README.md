@@ -40,6 +40,10 @@ The following screenshot shows the model to calculate the urban heat risk index 
 
 The results are visualized through interactive maps and dashboards, making it easy for stakeholders to understand the extent and impact of UHIs in their regions.
 
+![Screenshot Notebook Heat Risk Index](https://github.com/user-attachments/assets/7fea4ad1-a20c-4bcc-b1d5-035fc2b61ec4)
+
+*Screenshot: ArcGIS API for Python Heat Risk Index*
+
 ## Getting Started
 
 ### Prerequisites
