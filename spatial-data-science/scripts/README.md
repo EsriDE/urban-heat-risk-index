@@ -16,7 +16,21 @@ pip install --user .
 
 ```python
 
-from heatri import calculate_heat_risk_index
+from arcgis.features import GeoAccessor
+from heatri import calculate_heat_risk_index_using_extent
 
-# TODO
+# Calculates the heat risk index using an extent
+extent = {
+    'spatialReference': {
+        'latestWkid': 3857,
+        'wkid': 102100
+    },
+    'xmin': 789781.3584458455,
+    'ymin': 6573897.888560204,
+    'xmax': 790368.9681008684,
+    'ymax': 6574136.754273627
+}
+heat_risk_index_features = calculate_heat_risk_index_using_extent(extent)
+hri_sdf = GeoAccessor.from_featureclass(heat_risk_index_features)
+hri_sdf
 ```
