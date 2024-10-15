@@ -4,8 +4,9 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-geo = "0.28.0"
-geoarrow = "0.2.0"
+geo = "*"
+geoarrow = "*"
+lexical-core = "*"
 reqwest = { version = "0.12.3", features = ["blocking"] }
 serde_esri = { version = "0.3.0", features = ["geo", "geoarrow", "places-client"] }
 serde_json = "1.0.115"
