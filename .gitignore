@@ -13,6 +13,10 @@
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs
 
+# Exclude arcgis_maps_package
+arcgis_maps_package/
+
+
 # Mono auto generated files
 mono_crash.*
 
