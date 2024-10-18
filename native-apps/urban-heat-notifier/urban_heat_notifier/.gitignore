@@ -47,5 +47,5 @@ app.*.map.json
 /android/app/release
 
 # Obfuscation related
-#.env
+.env
 env.g.dart
