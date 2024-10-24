@@ -1,4 +1,6 @@
 # Miscellaneous
+arcgis_maps_core
+*.so
 *.class
 *.log
 *.pyc
@@ -30,6 +32,8 @@ migrate_working_dir/
 .pub-cache/
 .pub/
 /build/
+pubspec.lock
+.packages
 
 # Symbolication related
 app.*.symbols
@@ -41,3 +45,7 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# Obfuscation related
+.env
+env.g.dart
