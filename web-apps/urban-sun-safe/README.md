@@ -15,6 +15,13 @@ npm install
 npm run dev
 ```
 
+update:
+
+```
+npm audit fix
+npm update --save
+```
+
 Then open your browser at http://localhost:3000/
 
 ## Create productive build
