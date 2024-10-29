@@ -32,7 +32,7 @@ class AppStore extends Accessor {
 
     whenOnce(() => this.map).then(async (map) => {
       await map.load();
-      document.title = map.portalItem.title;
+      // document.title = map.portalItem.title;
 
       await map.loadAll();
 

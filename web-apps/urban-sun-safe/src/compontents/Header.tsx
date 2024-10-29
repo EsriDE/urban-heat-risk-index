@@ -14,6 +14,7 @@ import "@esri/calcite-components/dist/components/calcite-menu-item";
 import "@esri/calcite-components/dist/components/calcite-navigation";
 import "@esri/calcite-components/dist/components/calcite-navigation-logo";
 import "@esri/calcite-components/dist/components/calcite-navigation-user";
+import * as Config from '../../configs/config.json'
 
 type HeaderProperties = Pick<Header, "store">;
 
@@ -65,7 +66,8 @@ class Header extends Widget<HeaderProperties> {
         <calcite-navigation slot="header">
           <calcite-navigation-logo
             slot="logo"
-            heading={this.store.map.portalItem.title}
+            // heading={this.store.map.portalItem.title}
+            heading={Config.title}
             description="ArcGIS Maps SDK for JavaScript"
             thumbnail="./icon-64.svg"
             onclick={() => {

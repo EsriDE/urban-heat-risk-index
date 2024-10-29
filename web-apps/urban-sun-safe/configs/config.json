@@ -1,0 +1,11 @@
+{
+    "title": "Urban Sun Safe",   
+    "services": {
+        "basemap": "arcgis/topographic",
+        "elevation": "world-elevation",
+        "osmBuildingsSceneLayerUrl": "https://basemaps3d.arcgis.com/arcgis/rest/services/OpenStreetMap3D_Buildings_v1/SceneServer",
+        "osmTreesSceneLayerUrl": "https://basemaps3d.arcgis.com/arcgis/rest/services/OpenStreetMap3D_Trees_Realistic_v1/SceneServer",
+        "hriVectorTileServiceUrl": "https://tiles.arcgis.com/tiles/L3oChwD1l1qISUDT/arcgis/rest/services/HRI_Bonn/VectorTileServer",
+        "hriFeatureServiceUrl": "https://services2.arcgis.com/L3oChwD1l1qISUDT/arcgis/rest/services/HRI_Bonn/FeatureServer/0"
+    }
+}
