@@ -5,4 +5,3 @@ dist
 src/**/*.js
 src/**/*.js.map
 authconfig.json
-package-lock.json
