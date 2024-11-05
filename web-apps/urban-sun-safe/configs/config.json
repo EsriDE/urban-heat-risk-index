@@ -1,5 +1,6 @@
 {
-    "title": "Urban Sun Safe",   
+    "title": "Urban Sun Safe",
+    "description": "This app shows Urban Heat Inslands in the City of Bonn. In addition, the shadow cast can be calculated at these hotspots. And you can test the impact of parasols or awnings on the shade.",
     "services": {
         "basemap": "arcgis/topographic",
         "elevation": "world-elevation",
