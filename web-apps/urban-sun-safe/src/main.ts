@@ -6,7 +6,6 @@ import VectorTileLayer from "@arcgis/core/layers/VectorTileLayer";
 import FeatureLayer from "@arcgis/core/layers/FeatureLayer";
 import esriConfig from "@arcgis/core/config";
 import "@esri/calcite-components/dist/calcite/calcite.css";
-import * as AuthConfig from '../configs/authconfig.json';
 import * as Config from '../configs/config.json'
 import App from "./compontents/App";
 import AppStore from "./stores/AppStore";
@@ -16,7 +15,7 @@ console.log(`Using ArcGIS Maps SDK for JavaScript v${kernel.fullVersion}`);
 
 // setAssetPath("https://js.arcgis.com/calcite-components/1.0.0-beta.77/assets");
 
-esriConfig.apiKey = AuthConfig.apikey;
+esriConfig.apiKey = Config.apikey;
 
 const hriVtLayer = new VectorTileLayer({
   url: Config.services.hriVectorTileServiceUrl,
@@ -35,7 +34,10 @@ const osmTreesSceneLayer = new SceneLayer({
 });
 
 const hriFLayer = new FeatureLayer({
-  url: Config.services.hriFeatureServiceUrl,
+  portalItem: {
+    id: Config.services.hriFeatureServicePortalItem
+  },
+  // url: Config.services.hriFeatureServiceUrl,
   definitionExpression: "hri >= 9",
   // opacity: 0.3,
   title: "hriFLayer"

@@ -1,4 +1,5 @@
 {
+    "apikey": "your_api_key",
     "title": "Urban Sun Safe",
     "description": "This app shows Urban Heat Inslands in the City of Bonn. In addition, the shadow cast can be calculated at these hotspots. And you can test the impact of parasols or awnings on the shade.",
     "services": {
@@ -8,6 +9,7 @@
         "bonnIntegratedMeshUrl": "https://tiles.arcgis.com/tiles/JhD3NyxTJcNiae8J/arcgis/rest/services/Bonn_2019_UrbMapper_3cm_korrigiert/SceneServer",
         "osmTreesSceneLayerUrl": "https://basemaps3d.arcgis.com/arcgis/rest/services/OpenStreetMap3D_Trees_Realistic_v1/SceneServer",
         "hriVectorTileServiceUrl": "https://tiles.arcgis.com/tiles/L3oChwD1l1qISUDT/arcgis/rest/services/HRI_Bonn/VectorTileServer",
-        "hriFeatureServiceUrl": "https://services2.arcgis.com/L3oChwD1l1qISUDT/arcgis/rest/services/HRI_Bonn/FeatureServer/0"
+        "hriFeatureServiceUrl": "https://services2.arcgis.com/L3oChwD1l1qISUDT/arcgis/rest/services/HRI_Bonn/FeatureServer/0",
+        "hriFeatureServicePortalItem": "5969b96bfb0340b0abe1ad78dbe8150c"
     }
 }
