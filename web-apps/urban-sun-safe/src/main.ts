@@ -52,7 +52,7 @@ const hriFLayer = new FeatureLayer({
 const map = new WebScene({
   basemap: Config.services.basemap, // basemap styles service
   ground: Config.services.elevation, //Elevation service
-  layers: [hriVtLayer, osmBuildingsSceneLayer, osmTreesSceneLayer, hriFLayer],
+  layers: [hriVtLayer, osmBuildingsSceneLayer, osmTreesSceneLayer, hriFLayer]
 });
 
 const view = new SceneView({
@@ -60,11 +60,11 @@ const view = new SceneView({
   map: map,
   camera: {
     position: {
-      x: 7.100000, //Longitude
-      y: 50.733334, //Latitude
+      x: 7.10, //Longitude
+      y: 50.71, //Latitude
       z: 2000 //Meters
     },
-    tilt: 75
+    tilt: 60
   }
   });
 
