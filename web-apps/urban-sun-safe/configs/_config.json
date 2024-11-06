@@ -6,10 +6,14 @@
         "basemap": "arcgis/topographic",
         "elevation": "world-elevation",
         "osmBuildingsSceneLayerUrl": "https://basemaps3d.arcgis.com/arcgis/rest/services/OpenStreetMap3D_Buildings_v1/SceneServer",
+        "osmBuildingTitle": "OSM Buildings",
         "bonnIntegratedMeshUrl": "https://tiles.arcgis.com/tiles/JhD3NyxTJcNiae8J/arcgis/rest/services/Bonn_2019_UrbMapper_3cm_korrigiert/SceneServer",
+        "bonnMeshTitle": "Mesh Bonn",
         "osmTreesSceneLayerUrl": "https://basemaps3d.arcgis.com/arcgis/rest/services/OpenStreetMap3D_Trees_Realistic_v1/SceneServer",
+        "osmTreesTitle": "OSM Trees",
         "hriVectorTileServiceUrl": "https://tiles.arcgis.com/tiles/L3oChwD1l1qISUDT/arcgis/rest/services/HRI_Bonn/VectorTileServer",
-        "hriFeatureServiceUrl": "https://services2.arcgis.com/L3oChwD1l1qISUDT/arcgis/rest/services/HRI_Bonn/FeatureServer/0",
-        "hriFeatureServicePortalItem": "5969b96bfb0340b0abe1ad78dbe8150c"
+        "hriVectorTileServiceTitle": "Heat Risk Index Vector",
+        "hriFeatureServicePortalItem": "5969b96bfb0340b0abe1ad78dbe8150c",
+        "hriFeatureServiceTitle": "Heat Risk Index Feature"
     }
 }

@@ -19,28 +19,33 @@ esriConfig.apiKey = Config.apikey;
 
 const hriVtLayer = new VectorTileLayer({
   url: Config.services.hriVectorTileServiceUrl,
-  title: "hriVtLayer"
+  title: Config.services.hriVectorTileServiceTitle
 })
 
 const osmBuildingsSceneLayer = new SceneLayer({  
     url: Config.services.osmBuildingsSceneLayerUrl,
-    popupEnabled: false
+    popupEnabled: false,
+    title: Config.services.osmBuildingTitle
   },
 );
 
 const osmTreesSceneLayer = new SceneLayer({
   url: Config.services.osmTreesSceneLayerUrl,
-  popupEnabled: false
+  popupEnabled: false,
+  title: Config.services.osmTreesTitle
 });
 
 const hriFLayer = new FeatureLayer({
   portalItem: {
     id: Config.services.hriFeatureServicePortalItem
   },
-  // url: Config.services.hriFeatureServiceUrl,
+  elevationInfo: {
+    mode: 'relative-to-ground',
+    offset: 3
+  },
   definitionExpression: "hri >= 9",
   // opacity: 0.3,
-  title: "hriFLayer"
+  title: Config.services.hriFeatureServiceTitle
 });
 
 
