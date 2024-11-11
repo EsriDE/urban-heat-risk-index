@@ -10,6 +10,7 @@ import * as Config from '../configs/config.json'
 import App from "./compontents/App";
 import AppStore from "./stores/AppStore";
 import WebScene from "@arcgis/core/WebScene";
+import GraphicsLayer from "@arcgis/core/layers/GraphicsLayer";
 
 console.log(`Using ArcGIS Maps SDK for JavaScript v${kernel.fullVersion}`);
 
@@ -48,16 +49,24 @@ const hriFLayer = new FeatureLayer({
   title: Config.services.hriFeatureServiceTitle
 });
 
+  const sketchLayer = new GraphicsLayer({
+    elevationInfo: {
+      mode: "relative-to-ground"
+    },
+    title: "Sketched geometries",
+    listMode: 'hide'
+  })
 
-const map = new WebScene({
+
+const webMap = new WebScene({
   basemap: Config.services.basemap, // basemap styles service
   ground: Config.services.elevation, //Elevation service
-  layers: [hriVtLayer, osmBuildingsSceneLayer, osmTreesSceneLayer, hriFLayer]
+  layers: [hriVtLayer, osmBuildingsSceneLayer, osmTreesSceneLayer, hriFLayer, sketchLayer]
 });
 
 const view = new SceneView({
   container: "viewDiv",
-  map: map,
+  map: webMap,
   camera: {
     position: {
       x: 7.10, //Longitude
