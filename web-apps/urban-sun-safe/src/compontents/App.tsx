@@ -29,44 +29,27 @@ class App extends Widget<AppProperties> {
 
   postInitialize(): void {
     const view = this.store.view;
-
-    // Legend
-    const heatLayer = view.map.allLayers.find(function(layer) {
-      return layer.title === Config.services.hriFeatureServiceTitle
-     });
-    const legend = new Legend({ 
-      view: view, 
-      layerInfos: [
-        {
-          layer: heatLayer,
-          title: ""
-        }] 
-    })
-    const expandLegend = new Expand({
-      expandIcon: "color-coded-map", 
-      expandTooltip: "Legend Heat Risk Layer",
-      view: view,
-      content: legend
-    })
-    view.ui.add({component: expandLegend, position: "top-left", index: 0})
-
-    // Layer List
-    const layerList = new LayerList({
-      view: view
-    })
-    const expandLayerList = new Expand({
-      expandIcon: "map-contents", 
-      expandTooltip: "Layer List",
-      view: view,
-      content: layerList
-    })
-    view.ui.add({component: expandLayerList, position: "top-left", index: 1})
     
+    // Shadow Cast Panel
+    const container = document.createElement('div')
+    container.classList.add('shadowPanel')
     // Search
-    const search = new Search({view: view})
-    view.ui.add({component: search, position: "top-right", index: 0})
-
+    const searchContainer = this.createShadowPanelElement(container, Config.shadowPanel.labelSearch)
+    new Search({view: view, container: searchContainer})
+    // Shadow Cast
+    const shadowContainer = this.createShadowPanelElement(container, Config.shadowPanel.labelShadow)
+    const shadow = new ShadowCast({
+      view: view,
+      visibleElements: {
+        'visualizationOptions': false
+      },
+      container: shadowContainer
+    })
+    shadow.viewModel.date = new Date("June 21, 2024");
+    shadow.viewModel.visualizationType = "duration";
+    shadow.visible = false
     // Sketch
+    const sketchContainer = this.createShadowPanelElement(container, Config.shadowPanel.labelDraw)
     const graphicsLayer = view.map.allLayers.find(function(layer) {
       return layer.title === 'Sketched geometries'
      });
@@ -116,7 +99,7 @@ class App extends Widget<AppProperties> {
         hasZ: true
       }
     })
-     const sketch = new Sketch({
+    new Sketch({
       layer: graphicsLayer,
       view: view,
       visibleElements: {
@@ -126,32 +109,70 @@ class App extends Widget<AppProperties> {
           point:false
         }
       },
-      viewModel: sketchViewModel
+      viewModel: sketchViewModel,
+      container: sketchContainer
     });
-    const expandSketch = new Expand({
-      expandIcon: "pencil",
-      expandTooltip: "Draw",
-      view: view,
-      content: sketch
-    })
-    view.ui.add(expandSketch, 'top-right')
-
-    // Shadow Cast
-    const shadow = new ShadowCast({
-      view: view,
-      visibleElements: {
-        'visualizationOptions': false
-      }
-    })
-    shadow.viewModel.date = new Date("June 21, 2024");
-    shadow.viewModel.visualizationType = "duration";
+    // Expand
     const expandShadow = new Expand({
-      expandIcon: "measure-building-height-shadow",
+      expandIcon: "brightness",
       expandTooltip: "Shadow Cast",
       view: view,
-      content: shadow
+      content: container
     })
-    view.ui.add(expandShadow, 'top-right')
+    view.ui.add(expandShadow, 'top-left')
+    // Hide Shadow when panel closed
+    expandShadow.watch('expanded', (expanded) =>{
+      if (expanded) {
+        shadow.visible = true
+      } else {
+        shadow.visible = false
+      }
+    });
+
+    // Map Tools
+    view.ui.move([ "zoom", "compass", "navigation-toggle" ], "top-right");
+    // Legend
+    const heatLayer = view.map.allLayers.find(function(layer) {
+      return layer.title === Config.services.hriFeatureServiceTitle
+     });
+    const legend = new Legend({ 
+      view: view, 
+      layerInfos: [
+        {
+          layer: heatLayer,
+          title: ""
+        }] 
+    })
+    const expandLegend = new Expand({
+      expandIcon: "color-coded-map", 
+      expandTooltip: "Legend Heat Risk Layer",
+      view: view,
+      content: legend
+    })
+    view.ui.add({component: expandLegend, position: "top-right", index: 0})
+
+    // Layer List
+    const layerList = new LayerList({
+      view: view
+    })
+    const expandLayerList = new Expand({
+      expandIcon: "map-contents", 
+      expandTooltip: "Layer List",
+      view: view,
+      content: layerList
+    })
+    view.ui.add({component: expandLayerList, position: "top-right", index: 1})
+  }
+
+  createShadowPanelElement(parentContainer: HTMLDivElement, header: string): HTMLDivElement {
+    const container = document.createElement('div')
+    container.classList.add('shadowPanelElement')
+    const label = document.createElement('div')
+    label.classList.add('shadowPanelElementLabel')
+    label.innerHTML = header
+    container.appendChild(label)
+    parentContainer.appendChild(container)
+    return container
   }
 
   render() {
