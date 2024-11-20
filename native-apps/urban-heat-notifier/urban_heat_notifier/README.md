@@ -33,9 +33,11 @@ cd urban_heat_notifier
 ```
 
 Use `flutter pub upgrade` to configure the dependencies.
+Use `dart run arcgis_maps install` to install arcgis_maps_core.
 
 ```
 flutter pub upgrade
+dart run arcgis_maps install
 ```
 
 Step 2: Configure environment variables (based on [ENVied](https://pub.dev/packages/envied))
