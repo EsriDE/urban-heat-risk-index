@@ -15,5 +15,10 @@
         "hriVectorTileServiceTitle": "Heat Risk Index Vector",
         "hriFeatureServicePortalItem": "5969b96bfb0340b0abe1ad78dbe8150c",
         "hriFeatureServiceTitle": "Heat Risk Index Feature"
+    },
+    "shadowPanel" : {
+        "labelSearch": "1. Search location",
+        "labelShadow": "2. Display shadow at this location",
+        "labelDraw": "3. Test impact of parasols by drawing in the map"
     }
 }

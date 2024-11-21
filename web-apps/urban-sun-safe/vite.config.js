@@ -5,5 +5,12 @@ export default {
   base: "./",
   build: {
     target: "es2020",
+  },
+  css: {
+    preprocessorOptions: {
+      scss: {
+        api: 'modern-compiler'
+      }
+    }
   }
 }
