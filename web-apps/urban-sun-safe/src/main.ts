@@ -44,8 +44,8 @@ const hriFLayer = new FeatureLayer({
     mode: 'relative-to-ground',
     offset: 3
   },
-  definitionExpression: "hri >= 9",
-  // opacity: 0.3,
+  opacity: 0.5,
+  minScale: 3000,
   title: Config.services.hriFeatureServiceTitle
 });
 

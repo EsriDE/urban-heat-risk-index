@@ -33,3 +33,19 @@ calcite-navigation-logo {
   right: 0px;
   z-index: 1;
 }
+
+.shadowPanel {
+  width: 400px;
+}
+
+.shadowPanelElement {
+  padding: 10px;
+  padding-top: 30px;
+  display: block;
+  width: inherit;
+}
+
+.shadowPanelElementLabel {
+  font-weight: bolder;
+  padding-bottom: 10px;
+}
