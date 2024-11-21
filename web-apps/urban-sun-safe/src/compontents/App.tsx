@@ -19,6 +19,7 @@ import Sketch from "@arcgis/core/widgets/Sketch";
 import { PolygonSymbol3D, ExtrudeSymbol3DLayer } from "@arcgis/core/symbols";
 import SolidEdges3D from "@arcgis/core/symbols/edges/SolidEdges3D";
 import SketchViewModel from "@arcgis/core/widgets/Sketch/SketchViewModel";
+import SceneLayer from "@arcgis/core/layers/SceneLayer";
 
 type AppProperties = Pick<App, "store">;
 
@@ -99,6 +100,9 @@ class App extends Widget<AppProperties> {
         hasZ: true
       }
     })
+    const buildingLayer = view.map.allLayers.find(function(layer) {
+      return layer.title === Config.services.osmBuildingTitle
+     }) as SceneLayer;
     new Sketch({
       layer: graphicsLayer,
       view: view,
@@ -108,6 +112,11 @@ class App extends Widget<AppProperties> {
           polyline: false,
           point:false
         }
+      },
+      snappingOptions: {
+        enabled: true,
+        selfEnabled: true,
+        featureSources: [{ layer: buildingLayer, enabled: true}]
       },
       viewModel: sketchViewModel,
       container: sketchContainer
