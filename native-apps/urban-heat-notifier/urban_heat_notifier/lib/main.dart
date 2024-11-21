@@ -31,6 +31,9 @@ class _MapScreenState extends State<MapScreen> {
   final _mapViewController = ArcGISMapView.createController();
   late ArcGISVectorTiledLayer _hriVectorTiledLayer;
   late FeatureLayer _hriFeatureLayer;
+  late FeatureLayer _dwFeatureLayer;
+  bool isButtonVisible = false;
+  final _geodeticOverlay = GraphicsOverlay();
 
   @override
   void initState() {
@@ -43,8 +46,10 @@ class _MapScreenState extends State<MapScreen> {
         appBar: AppBar(title: Text(Env.title)),
         body: Stack(children: [
           ArcGISMapView(
-              controllerProvider: () => _mapViewController,
-              onMapViewReady: onMapViewReady),
+            controllerProvider: () => _mapViewController,
+            onMapViewReady: onMapViewReady,
+            onLongPressEnd: onLongPressEnd,
+          ),
           Positioned(
             bottom: 30,
             right: 16,
@@ -78,6 +83,22 @@ class _MapScreenState extends State<MapScreen> {
                   },
                 ),
               ],
+            ),
+          ),
+          Positioned(
+            bottom: 110,
+            right: 18,
+            child: Visibility(
+              visible: isButtonVisible,
+              child: Container(
+                height: 30,
+                width: 55,
+                child: FloatingActionButton(
+                  onPressed: onClearButtenPressed,
+                  backgroundColor: Colors.grey,
+                  child: Text("Clear"),
+                ),
+              ),
             ),
           ),
           if (_showHriDetails)
@@ -120,6 +141,69 @@ class _MapScreenState extends State<MapScreen> {
         ]));
   }
 
+  void onLongPressEnd(Offset screenPoint) async {
+    if (!isButtonVisible) {
+      _geodeticOverlay.graphics.clear();
+      // Capture the tapped point and convert it to a map point.
+      final mapPoint = _mapViewController.screenToLocation(screen: screenPoint);
+      if (mapPoint == null) return;
+
+      // Create a geodetic buffer around the tapped point at the specified distance.
+      final geodeticGeometry = GeometryEngine.bufferGeodetic(
+        geometry: mapPoint,
+        distance: 100,
+        distanceUnit: LinearUnit(unitId: LinearUnitId.meters),
+        maxDeviation: double.nan,
+        curveType: GeodeticCurveType.geodesic,
+      );
+      // Create and add a graphic to the geodetic overlay.
+      final geodeticGraphic = Graphic(geometry: geodeticGeometry);
+      _geodeticOverlay.graphics.add(geodeticGraphic);
+
+      final queryParameters = QueryParameters();
+      queryParameters.geometry = geodeticGeometry;
+      queryParameters.returnGeometry = false;
+
+      ServiceFeatureTable sfTable =
+          _dwFeatureLayer.featureTable as ServiceFeatureTable;
+
+      final queryResult = await sfTable.queryFeatures(
+        parameters: queryParameters,
+      );
+
+      var whereClause = '';
+
+      for (var feature in queryResult.features()) {
+        whereClause =
+            whereClause + 'ObjectId = ${feature.attributes['ObjectId']}';
+
+        if (feature.attributes['ObjectId'] !=
+                queryResult.features().first.attributes['ObjectId'] &&
+            feature.attributes['ObjectId'] !=
+                queryResult.features().last.attributes['objectId']) {
+          whereClause = whereClause + ' OR ';
+        }
+      }
+
+      _dwFeatureLayer.definitionExpression = whereClause;
+      await _dwFeatureLayer.retryLoad();
+      // _dwFeatureLayer.setFeaturesVisible(features: queryResult.features().toList(), visible: false);
+      _dwFeatureLayer.isVisible = true;
+
+      setState(() {
+        isButtonVisible = !isButtonVisible;
+      });
+    }
+  }
+
+  void onClearButtenPressed() {
+    _geodeticOverlay.graphics.clear();
+    _dwFeatureLayer.isVisible = false;
+    setState(() {
+      isButtonVisible = !isButtonVisible;
+    });
+  }
+
   void onMapViewReady() async {
     BasemapStyle basemapStyle =
         BasemapStyle.values.firstWhere((e) => e.toString() == Env.basemap);
@@ -160,7 +244,34 @@ class _MapScreenState extends State<MapScreen> {
       };
     });
 
+    portalItem = PortalItem.withPortalAndItemId(
+        portal: Portal.arcGISOnline(),
+        itemId: Env.drinkingWaterFeatureServicePortalItemID);
+
+    _dwFeatureLayer =
+        FeatureLayer.withItem(featureServiceItem: portalItem, layerId: 0);
+    _dwFeatureLayer.isVisible = false;
+    map.operationalLayers.add(_dwFeatureLayer);
+
     _mapViewController.arcGISMap = map;
+
+    // Configure the graphics overlay for the geodetic buffers.
+    _geodeticOverlay.renderer = SimpleRenderer(
+      symbol: SimpleFillSymbol(
+        style: SimpleFillSymbolStyle.solid,
+        color: Colors.grey,
+        outline: SimpleLineSymbol(
+          style: SimpleLineSymbolStyle.solid,
+          color: Colors.black,
+          width: 2.0,
+        ),
+      ),
+    );
+    _geodeticOverlay.opacity = 0.2;
+
+    _mapViewController.graphicsOverlays.addAll(
+      [_geodeticOverlay],
+    );
 
     // Set the initial system location data source and auto-pan mode.
     _mapViewController.locationDisplay.dataSource = SystemLocationDataSource();
@@ -170,7 +281,6 @@ class _MapScreenState extends State<MapScreen> {
 
     _mapViewController.locationDisplay.onLocationChanged
         .listen((location) async {
-          
       _hriFeatureLayer.clearSelection();
       final locationGeometryProjected = GeometryEngine.project(
           location.position,
@@ -192,7 +302,9 @@ class _MapScreenState extends State<MapScreen> {
         final locationFeature = queryResult.features().first;
 
         _currentLocationFeature = locationFeature;
-        _hriFeatureLayer.selectFeature(feature: locationFeature);
+        if (_switchValue) {
+          _hriFeatureLayer.selectFeature(feature: locationFeature);
+        }
 
         setState(() {
           _hriDetails = _currentLocationFeature!.attributes.entries
