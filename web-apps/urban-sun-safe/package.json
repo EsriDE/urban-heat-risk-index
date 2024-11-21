@@ -18,7 +18,6 @@
   },
   "dependencies": {
     "@arcgis/core": "^4.31.4",
-    "@arcgis/map-components-react": "^4.31.6",
     "@esri/calcite-components": "^2.13.2",
     "arcgis-core-template": "file:"
   },
