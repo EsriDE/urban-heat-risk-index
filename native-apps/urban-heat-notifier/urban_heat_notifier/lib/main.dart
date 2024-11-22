@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:arcgis_maps/arcgis_maps.dart';
+import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'env/env.dart';
 
@@ -34,6 +35,7 @@ class _MapScreenState extends State<MapScreen> {
   late FeatureLayer _dwFeatureLayer;
   bool isButtonVisible = false;
   final _geodeticOverlay = GraphicsOverlay();
+  final _placesOverlay = GraphicsOverlay();
 
   @override
   void initState() {
@@ -143,6 +145,7 @@ class _MapScreenState extends State<MapScreen> {
 
   void onLongPressEnd(Offset screenPoint) async {
     if (!isButtonVisible) {
+      _hriFeatureLayer.isVisible = false;
       _geodeticOverlay.graphics.clear();
       // Capture the tapped point and convert it to a map point.
       final mapPoint = _mapViewController.screenToLocation(screen: screenPoint);
@@ -151,44 +154,15 @@ class _MapScreenState extends State<MapScreen> {
       // Create a geodetic buffer around the tapped point at the specified distance.
       final geodeticGeometry = GeometryEngine.bufferGeodetic(
         geometry: mapPoint,
-        distance: 100,
+        distance: double.parse(Env.placesSearchRadius),
         distanceUnit: LinearUnit(unitId: LinearUnitId.meters),
         maxDeviation: double.nan,
         curveType: GeodeticCurveType.geodesic,
       );
-      // Create and add a graphic to the geodetic overlay.
-      final geodeticGraphic = Graphic(geometry: geodeticGeometry);
-      _geodeticOverlay.graphics.add(geodeticGraphic);
 
-      final queryParameters = QueryParameters();
-      queryParameters.geometry = geodeticGeometry;
-      queryParameters.returnGeometry = false;
-
-      ServiceFeatureTable sfTable =
-          _dwFeatureLayer.featureTable as ServiceFeatureTable;
-
-      final queryResult = await sfTable.queryFeatures(
-        parameters: queryParameters,
-      );
-
-      var whereClause = '';
-
-      for (var feature in queryResult.features()) {
-        whereClause =
-            whereClause + 'ObjectId = ${feature.attributes['ObjectId']}';
-
-        if (feature.attributes['ObjectId'] !=
-                queryResult.features().first.attributes['ObjectId'] &&
-            feature.attributes['ObjectId'] !=
-                queryResult.features().last.attributes['objectId']) {
-          whereClause = whereClause + ' OR ';
-        }
-      }
-
-      _dwFeatureLayer.definitionExpression = whereClause;
-      await _dwFeatureLayer.retryLoad();
-      // _dwFeatureLayer.setFeaturesVisible(features: queryResult.features().toList(), visible: false);
-      _dwFeatureLayer.isVisible = true;
+      showBuffer(geodeticGeometry);
+      showDrinkingWater(geodeticGeometry);
+      showPlaces(mapPoint);
 
       setState(() {
         isButtonVisible = !isButtonVisible;
@@ -196,9 +170,123 @@ class _MapScreenState extends State<MapScreen> {
     }
   }
 
+  void showBuffer(Geometry geodeticGeometry) async {
+    final geodeticGraphic = Graphic(geometry: geodeticGeometry);
+    _geodeticOverlay.graphics.add(geodeticGraphic);
+  }
+
+  void showPlaces(Geometry mapPoint) async {
+    final wgs84MapPoint = GeometryEngine.project(mapPoint,
+        outputSpatialReference: SpatialReference.wgs84) as ArcGISPoint;
+
+    String url = '${Env.placesServiceUrl}'
+        '?f=json'
+        '&x=${wgs84MapPoint.x}'
+        '&y=${wgs84MapPoint.y}'
+        '&radius=${Env.placesSearchRadius}'
+        '&categoryIds=${Env.placesCategoryIds}'
+        '&pageSize=20'
+        '&icon=png'
+        '&token=${Env.apikey}';
+
+    List<dynamic> allResults = [];
+    bool hasNextPage = true;
+
+    while (hasNextPage) {
+      final response = await http.get(Uri.parse(url));
+
+      if (response.statusCode == 200) {
+        final String responseBody = response.body;
+
+        final Map<String, dynamic> jsonResponse = json.decode(responseBody);
+        allResults.addAll(jsonResponse['results']);
+
+        if (jsonResponse.containsKey('pagination') &&
+            jsonResponse['pagination'].containsKey('nextUrl')) {
+          url = jsonResponse['pagination']['nextUrl'];
+          url += '&token=${Env.apikey}';
+          print('Next URL: $url'); // Debugging-Ausgabe
+        } else {
+          hasNextPage = false;
+        }
+      } else {
+        print('Request failed with status: ${response.statusCode}');
+        hasNextPage = false;
+      }
+    }
+
+    List<Graphic> graphics = allResults.map((result) {
+      double x = result['location']['x'];
+      double y = result['location']['y'];
+      ArcGISPoint point = ArcGISPoint(
+        x: x,
+        y: y,
+        spatialReference: SpatialReference.wgs84,
+      );
+
+      ArcGISPoint projectedPoint = GeometryEngine.project(point,
+          outputSpatialReference: SpatialReference.webMercator) as ArcGISPoint;
+
+      Map<String, dynamic> attributes = {
+        'placeId': result['placeId'],
+        'name': result['name'],
+        'distance': result['distance'],
+        'categoryId': result['categories'][0]['categoryId'],
+        'categoryLabel': result['categories'][0]['label'],
+      };
+
+      Uri iconUri = Uri.parse(result['icon']['url']);
+      PictureMarkerSymbol symbol = PictureMarkerSymbol.withUrl(iconUri);
+      symbol.width = 30;
+      symbol.height = 30;
+
+      return Graphic(
+        geometry: projectedPoint,
+        symbol: symbol,
+        attributes: attributes,
+      );
+    }).toList();
+
+    _placesOverlay.graphics.addAll(graphics);
+  }
+
+  void showDrinkingWater(Geometry geodeticGeometry) async {
+    final queryParameters = QueryParameters();
+    queryParameters.geometry = geodeticGeometry;
+    queryParameters.returnGeometry = false;
+
+    ServiceFeatureTable sfTable =
+        _dwFeatureLayer.featureTable as ServiceFeatureTable;
+
+    final queryResult = await sfTable.queryFeatures(
+      parameters: queryParameters,
+    );
+
+    var whereClause = '';
+
+    for (var feature in queryResult.features()) {
+      whereClause =
+          whereClause + 'ObjectId = ${feature.attributes['ObjectId']}';
+
+      if (feature.attributes['ObjectId'] !=
+              queryResult.features().first.attributes['ObjectId'] &&
+          feature.attributes['ObjectId'] !=
+              queryResult.features().last.attributes['objectId']) {
+        whereClause = whereClause + ' OR ';
+      }
+    }
+
+    _dwFeatureLayer.definitionExpression = whereClause;
+    await _dwFeatureLayer.retryLoad();
+    // _dwFeatureLayer.setFeaturesVisible(features: queryResult.features().toList(), visible: false);
+    _dwFeatureLayer.isVisible = true;
+  }
+
   void onClearButtenPressed() {
     _geodeticOverlay.graphics.clear();
+    _placesOverlay.graphics.clear();
     _dwFeatureLayer.isVisible = false;
+    _hriFeatureLayer.isVisible = true;
     setState(() {
       isButtonVisible = !isButtonVisible;
     });
@@ -233,7 +321,7 @@ class _MapScreenState extends State<MapScreen> {
     _hriFeatureLayer =
         FeatureLayer.withItem(featureServiceItem: portalItem, layerId: 0);
     _hriFeatureLayer.definitionExpression = "hri >= 9";
-    _hriFeatureLayer.opacity = .5;
+    _hriFeatureLayer.opacity = .4;
     map.operationalLayers.add(_hriFeatureLayer);
 
     await _hriFeatureLayer.load();
@@ -262,15 +350,15 @@ class _MapScreenState extends State<MapScreen> {
         color: Colors.grey,
         outline: SimpleLineSymbol(
           style: SimpleLineSymbolStyle.solid,
-          color: Colors.black,
-          width: 2.0,
+          color: Colors.red,
+          width: 5.0,
         ),
       ),
     );
     _geodeticOverlay.opacity = 0.2;
 
     _mapViewController.graphicsOverlays.addAll(
-      [_geodeticOverlay],
+      [_geodeticOverlay, _placesOverlay],
     );
 
     // Set the initial system location data source and auto-pan mode.
@@ -343,6 +431,8 @@ class _MapScreenState extends State<MapScreen> {
   }
 
   void _toggleLayerVisibility(double scale) async {
+    if (!_placesOverlay.graphics.isEmpty) return;
+
     if (scale <= 10000) {
       _hriVectorTiledLayer.isVisible = false;
       _hriFeatureLayer.isVisible = true;

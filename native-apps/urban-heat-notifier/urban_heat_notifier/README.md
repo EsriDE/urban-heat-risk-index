@@ -54,6 +54,13 @@ Use `dart run build_runner build` to run the generator:
 dart run build_runner build
 ```
 
+When modifying the .env file, the generator might not pick up the change. If that happens simply clean the build cache and run the generator again.
+
+```
+dart run build_runner clean
+dart run build_runner build --delete-conflicting-outputs
+```
+
 Step 3 Run the application
 
 ```
