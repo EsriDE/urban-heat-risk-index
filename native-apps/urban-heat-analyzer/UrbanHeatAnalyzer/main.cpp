@@ -20,6 +20,7 @@
 // See <https://developers.arcgis.com/qt/> for further information.
 //
 
+#include "HeatRiskListModel.h"
 #include "UrbanHeatAnalyzer.h"
 
 #include "ArcGISRuntimeEnvironment.h"
@@ -90,6 +91,9 @@ int main(int argc, char *argv[])
 
     // Register the UrbanHeatAnalyzer (QQuickItem) for QML
     qmlRegisterType<UrbanHeatAnalyzer>("Esri.UrbanHeatAnalyzer", 1, 0, "UrbanHeatAnalyzer");
+
+    // Register the HeatRiskListModel for QML
+    qmlRegisterType<HeatRiskListModel>("Esri.UrbanHeatAnalyzer", 1, 0, "HeatRiskListModel");
 
     // Initialize application view
     QQmlApplicationEngine engine;

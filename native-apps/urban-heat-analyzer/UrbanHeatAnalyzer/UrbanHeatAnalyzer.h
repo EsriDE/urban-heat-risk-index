@@ -23,6 +23,8 @@
 #ifndef URBANHEATANALYZER_H
 #define URBANHEATANALYZER_H
 
+class HeatRiskListModel;
+
 namespace Esri::ArcGISRuntime {
 class Scene;
 class SceneQuickView;
@@ -32,12 +34,16 @@ class SceneQuickView;
 
 Q_MOC_INCLUDE("SceneQuickView.h")
 
+
 class UrbanHeatAnalyzer : public QObject
 {
     Q_OBJECT
 
-    Q_PROPERTY(Esri::ArcGISRuntime::SceneQuickView *sceneView READ sceneView WRITE setSceneView
+    Q_PROPERTY(Esri::ArcGISRuntime::SceneQuickView *sceneView
+                   READ sceneView WRITE setSceneView
                    NOTIFY sceneViewChanged)
+    Q_PROPERTY(HeatRiskListModel *heatRiskListModel
+                   WRITE setHeatRiskListModel)
 
 public:
     explicit UrbanHeatAnalyzer(QObject *parent = nullptr);
@@ -54,8 +60,11 @@ private:
     Esri::ArcGISRuntime::SceneQuickView *sceneView() const;
     void setSceneView(Esri::ArcGISRuntime::SceneQuickView *sceneView);
 
+    void setHeatRiskListModel(HeatRiskListModel *heatRiskListModel);
+
     Esri::ArcGISRuntime::Scene *m_scene = nullptr;
     Esri::ArcGISRuntime::SceneQuickView *m_sceneView = nullptr;
+    HeatRiskListModel *m_heatRiskListModel = nullptr;
 };
 
 #endif // URBANHEATANALYZER_H

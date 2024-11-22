@@ -46,23 +46,6 @@ ApplicationWindow {
         RowLayout {
             anchors.fill: parent
 
-            ListModel {
-                id: riskModel
-
-                ListElement {
-                    name: "Place 1"
-                    risk: 12
-                }
-                ListElement {
-                    name: "Place 2"
-                    risk: 11
-                }
-                ListElement {
-                    name: "Place 3"
-                    risk: 10
-                }
-            }
-
             Rectangle {
                 Layout.fillWidth: true
                 Layout.fillHeight: true
@@ -107,7 +90,7 @@ ApplicationWindow {
                     anchors.fill: parent
                     orientation: Qt.Horizontal
 
-                    model: riskModel
+                    model: mapForm.heatRiskListModel
                     delegate: riskDelegate
                     highlight: Rectangle { color: Material.primary; radius: 5 }
                     focus: false

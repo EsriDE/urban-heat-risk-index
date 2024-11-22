@@ -26,8 +26,16 @@ import Esri.UrbanHeatAnalyzer
 
 Item {
 
+    // Define a property for HeatRiskListModel
+    property HeatRiskListModel heatRiskListModel: riskModel
+
     function printCamera() {
         model.printCamera();
+    }
+
+    // Create HeatRiskListModel here
+    HeatRiskListModel {
+        id: riskModel
     }
 
     // Create SceneQuickView here, and create its Scene etc. in C++ code
@@ -40,5 +48,6 @@ Item {
     UrbanHeatAnalyzer {
         id: model
         sceneView: view
+        heatRiskListModel: riskModel
     }
 }

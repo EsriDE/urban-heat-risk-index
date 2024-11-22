@@ -45,6 +45,8 @@ set(SOURCE_FILES
   main.cpp
   UrbanHeatAnalyzer.cpp
   UrbanHeatAnalyzer.h
+  HeatRiskListModel.cpp
+  HeatRiskListModel.h
   qml/qml.qrc
   Resources/Resources.qrc
   $<$<BOOL:${WIN32}>:Win/Resources.rc>

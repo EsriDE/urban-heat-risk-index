@@ -20,6 +20,7 @@
 // See <https://developers.arcgis.com/qt/> for further information.
 //
 
+#include "HeatRiskListModel.h"
 #include "UrbanHeatAnalyzer.h"
 
 #include "ArcGISSceneLayer.h"
@@ -106,7 +107,7 @@ UrbanHeatAnalyzer::UrbanHeatAnalyzer(QObject *parent /* = nullptr */)
             m_sceneView->setViewpointAsync(targetViewpoint, 10);
         }
 
-        //loadHeatRiskFeatures();
+        loadHeatRiskFeatures();
     });
     m_scene->operationalLayers()->append(tiledLayer);
 }
@@ -121,7 +122,8 @@ SceneQuickView *UrbanHeatAnalyzer::sceneView() const
 // Set the view (created in QML)
 void UrbanHeatAnalyzer::setSceneView(SceneQuickView *sceneView)
 {
-    if (!sceneView || sceneView == m_sceneView) {
+    if (!sceneView || sceneView == m_sceneView)
+    {
         return;
     }
 
@@ -129,6 +131,16 @@ void UrbanHeatAnalyzer::setSceneView(SceneQuickView *sceneView)
     m_sceneView->setArcGISScene(m_scene);
 
     emit sceneViewChanged();
+}
+
+void UrbanHeatAnalyzer::setHeatRiskListModel(HeatRiskListModel *heatRiskListModel)
+{
+    if (!heatRiskListModel)
+    {
+        return;
+    }
+
+    m_heatRiskListModel = heatRiskListModel;
 }
 
 void UrbanHeatAnalyzer::loadHeatRiskFeatures()
@@ -162,8 +174,8 @@ void UrbanHeatAnalyzer::loadHeatRiskFeatures()
                           return;
                     }
 
-                    QMap<double, QList<Feature*>> analysisGroups;
-                    QList<Feature*> currentGroup;
+                    QList<HeatRiskAnalysisGroup> analysisGroups;
+                    HeatRiskAnalysisGroup *currentGroup = nullptr;
 
                     // iterate over the result object
                     double lastValue = 9999;
@@ -176,22 +188,26 @@ void UrbanHeatAnalyzer::loadHeatRiskFeatures()
                         if (lastValue == heatRiskIndexValue)
                         {
                             // add to the last group
-                            currentGroup.append(feature);
+                            if (currentGroup)
+                            {
+                                currentGroup->addFeature(feature);
+                            }
                         }
                         else if (heatRiskIndexValue < lastValue)
                         {
                             // create a new group
-                            analysisGroups.insert(heatRiskIndexValue, QList(currentGroup));
-                            currentGroup.clear();
-                            currentGroup.append(feature);
+                            HeatRiskAnalysisGroup newGroup(heatRiskIndexValue);
+                            newGroup.addFeature(feature);
+                            analysisGroups.append(newGroup);
+                            currentGroup = &analysisGroups.last();
                         }
                         lastValue = heatRiskIndexValue;
                     }
 
-                    for (auto groupIt = analysisGroups.keyValueBegin(); groupIt != analysisGroups.keyValueEnd(); ++groupIt)
+                    // Load the features into the model
+                    if (m_heatRiskListModel)
                     {
-                        qDebug() << groupIt->first;
-                        qDebug() << groupIt->second.size();
+                        m_heatRiskListModel->loadAnalysisGroups(analysisGroups);
                     }
                 });
         });
