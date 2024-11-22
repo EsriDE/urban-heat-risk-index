@@ -79,6 +79,7 @@ ApplicationWindow {
                             anchors.fill: parent
                             onClicked: {
                                 riskView.currentIndex = index;
+                                mapForm.heatRiskListModel.select(index);
                                 console.log(name);
                             }
                         }

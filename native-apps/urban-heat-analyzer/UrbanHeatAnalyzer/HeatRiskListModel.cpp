@@ -64,12 +64,17 @@ void HeatRiskListModel::loadAnalysisGroups(const QList<HeatRiskAnalysisGroup> &a
     emit dataChanged(index(0,0), index(rowCount() - 1));
 }
 
-int HeatRiskListModel::rowCount(const QModelIndex & parent) const {
+void HeatRiskListModel::select(int index)
+{
+    qDebug() << index;
+}
+
+int HeatRiskListModel::rowCount(const QModelIndex &parent) const {
     Q_UNUSED(parent);
     return m_analysisGroups.count();
 }
 
-QVariant HeatRiskListModel::data(const QModelIndex & index, int role) const {
+QVariant HeatRiskListModel::data(const QModelIndex &index, int role) const {
     if (index.row() < 0 || index.row() >= m_analysisGroups.count())
         return QVariant();
 

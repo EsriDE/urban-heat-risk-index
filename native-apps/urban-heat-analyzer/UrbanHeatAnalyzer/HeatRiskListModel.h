@@ -51,9 +51,10 @@ public:
     explicit HeatRiskListModel(QObject *parent = nullptr);
 
     void loadAnalysisGroups(const QList<HeatRiskAnalysisGroup> &analysisGroups);
+    Q_INVOKABLE void select(int index);
 
-    int rowCount(const QModelIndex & parent = QModelIndex()) const;
-    QVariant data(const QModelIndex & index, int role = Qt::DisplayRole) const;
+    int rowCount(const QModelIndex &parent = QModelIndex()) const;
+    QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const;
 
 protected:
     QHash<int, QByteArray> roleNames() const;
