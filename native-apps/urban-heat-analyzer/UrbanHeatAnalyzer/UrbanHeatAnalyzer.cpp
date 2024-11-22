@@ -22,9 +22,11 @@
 
 #include "UrbanHeatAnalyzer.h"
 
+#include "ArcGISSceneLayer.h"
 #include "ArcGISTiledElevationSource.h"
 #include "ArcGISVectorTiledLayer.h"
 #include "AttributeListModel.h"
+#include "Camera.h"
 #include "CoreTypes.h"
 #include "ElevationSourceListModel.h"
 #include "Envelope.h"
@@ -36,10 +38,12 @@
 #include "LayerListModel.h"
 #include "MapTypes.h"
 #include "OrderBy.h"
+#include "Point.h"
 #include "QueryParameters.h"
 #include "Scene.h"
 #include "SceneQuickView.h"
 #include "ServiceFeatureTable.h"
+#include "SpatialReference.h"
 #include "Surface.h"
 #include "VectorTileCache.h"
 #include "Viewpoint.h"
@@ -55,13 +59,26 @@ UrbanHeatAnalyzer::UrbanHeatAnalyzer(QObject *parent /* = nullptr */)
     : QObject(parent)
     , m_scene(new Scene(BasemapStyle::OsmStandard, this))
 {
-    // create a new elevation source from Terrain3D rest service
-    ArcGISTiledElevationSource *elevationSource
-        = new ArcGISTiledElevationSource(QUrl("https://elevation3d.arcgis.com/arcgis/rest/services/"
-                                              "WorldElevation3D/Terrain3D/ImageServer"),
-                                         this);
+    // create a new scene layer from OSM Buildings rest service
+    ArcGISSceneLayer *osmSceneLayer = new ArcGISSceneLayer(
+        QUrl("https://basemaps3d.arcgis.com/arcgis/rest/services/"
+             "OpenStreetMap3D_Buildings_v1/SceneServer"),
+        this);
+    osmSceneLayer->setOpacity(0.75f);
 
-    // add vector tile cache
+    // add the scene layer to the scene
+    m_scene->operationalLayers()->append(osmSceneLayer);
+
+    // create a new elevation source from Terrain3D rest service
+    ArcGISTiledElevationSource *elevationSource = new ArcGISTiledElevationSource(
+        QUrl("https://elevation3d.arcgis.com/arcgis/rest/services/"
+             "WorldElevation3D/Terrain3D/ImageServer"),
+        this);
+
+    // add the elevation source to the scene to display elevation
+    m_scene->baseSurface()->elevationSources()->append(elevationSource);
+
+    // create a new vector tile cache from the exported vector tile package
     VectorTileCache *tileCache = new VectorTileCache(
         "/data/Germany/Bonn/heat_risk_index_bonn.vtpk",
         this);
@@ -70,14 +87,52 @@ UrbanHeatAnalyzer::UrbanHeatAnalyzer(QObject *parent /* = nullptr */)
     ArcGISVectorTiledLayer *tiledLayer = new ArcGISVectorTiledLayer(
         tileCache,
         this);
+    tiledLayer->setOpacity(0.33f);
+
     connect(tiledLayer, &ArcGISVectorTiledLayer::doneLoading, this, [tiledLayer, this]()
     {
-        Envelope layerExtent = tiledLayer->fullExtent();
-        Viewpoint viewpoint = Viewpoint(layerExtent);
-        m_sceneView->setViewpointAsync(viewpoint, 2.5);
+        //Envelope layerExtent = tiledLayer->fullExtent();
+        //Viewpoint viewpoint = Viewpoint(layerExtent);
+        //m_sceneView->setViewpointAsync(viewpoint, 2.5);
+        //m_sceneView->currentViewpointCamera();
+        //m_sceneView->setViewpointCameraAsync()
+
+        // Set the viewpoint on a specific target
+        Point targetLocation(7.11661 , 50.718 , 343.663, SpatialReference(4326));
+        Camera targetCamera(targetLocation, 93.2121 , 60.7764 , -5.68434e-14);
+        Viewpoint targetViewpoint(targetLocation, targetCamera);
+        if (m_sceneView)
+        {
+            m_sceneView->setViewpointAsync(targetViewpoint, 10);
+        }
+
+        //loadHeatRiskFeatures();
     });
     m_scene->operationalLayers()->append(tiledLayer);
+}
 
+UrbanHeatAnalyzer::~UrbanHeatAnalyzer() {}
+
+SceneQuickView *UrbanHeatAnalyzer::sceneView() const
+{
+    return m_sceneView;
+}
+
+// Set the view (created in QML)
+void UrbanHeatAnalyzer::setSceneView(SceneQuickView *sceneView)
+{
+    if (!sceneView || sceneView == m_sceneView) {
+        return;
+    }
+
+    m_sceneView = sceneView;
+    m_sceneView->setArcGISScene(m_scene);
+
+    emit sceneViewChanged();
+}
+
+void UrbanHeatAnalyzer::loadHeatRiskFeatures()
+{
     // add the features
     Geodatabase *gdb = new Geodatabase(
         "/data/Germany/Bonn/HRI Bonn.geodatabase",
@@ -103,8 +158,8 @@ UrbanHeatAnalyzer::UrbanHeatAnalyzer(QObject *parent /* = nullptr */)
                     auto queryResult = std::unique_ptr<FeatureQueryResult>(rawQueryResult);
                     if (queryResult && !queryResult->iterator().hasNext())
                     {
-                        // No results or invalid pointer
-                        return;
+                          // No results or invalid pointer
+                          return;
                     }
 
                     QMap<double, QList<Feature*>> analysisGroups;
@@ -143,27 +198,12 @@ UrbanHeatAnalyzer::UrbanHeatAnalyzer(QObject *parent /* = nullptr */)
         featureTable->load();
     });
     gdb->load();
-
-    // add the elevation source to the scene to display elevation
-    m_scene->baseSurface()->elevationSources()->append(elevationSource);
 }
 
-UrbanHeatAnalyzer::~UrbanHeatAnalyzer() {}
-
-SceneQuickView *UrbanHeatAnalyzer::sceneView() const
+void UrbanHeatAnalyzer::printCamera()
 {
-    return m_sceneView;
-}
-
-// Set the view (created in QML)
-void UrbanHeatAnalyzer::setSceneView(SceneQuickView *sceneView)
-{
-    if (!sceneView || sceneView == m_sceneView) {
-        return;
-    }
-
-    m_sceneView = sceneView;
-    m_sceneView->setArcGISScene(m_scene);
-
-    emit sceneViewChanged();
+    auto camera = m_sceneView->currentViewpointCamera();
+    auto location = camera.location();
+    qDebug() << location.x() << "," << location.y() << "," << location.z();
+    qDebug() << camera.heading() << "," << camera.pitch() << "," << camera.roll();
 }

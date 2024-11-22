@@ -9,6 +9,16 @@
 //
 // See the Sample code usage restrictions document for further information.
 //
+// This "Urban Heat Analyzer" sample app is licensed as
+// SPDX-License-Identifier: GPL-3.0-or-later
+//
+// Additional permission under GNU GPL version 3 section 4 and 5
+// If you modify this Program, or any covered work, by linking or combining
+// it with ArcGIS Runtime for Qt (or a modified version of that library),
+// containing parts covered by the terms of ArcGIS Runtime for Qt,
+// the licensors of this Program grant you additional permission to convey the resulting work.
+// See <https://developers.arcgis.com/qt/> for further information.
+//
 
 #ifndef URBANHEATANALYZER_H
 #define URBANHEATANALYZER_H
@@ -33,10 +43,14 @@ public:
     explicit UrbanHeatAnalyzer(QObject *parent = nullptr);
     ~UrbanHeatAnalyzer() override;
 
+    Q_INVOKABLE void printCamera();
+
 signals:
     void sceneViewChanged();
 
 private:
+    void loadHeatRiskFeatures();
+
     Esri::ArcGISRuntime::SceneQuickView *sceneView() const;
     void setSceneView(Esri::ArcGISRuntime::SceneQuickView *sceneView);
 

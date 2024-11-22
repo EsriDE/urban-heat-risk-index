@@ -9,12 +9,26 @@
 //
 // See the Sample code usage restrictions document for further information.
 //
+// This "Urban Heat Analyzer" sample app is licensed as
+// SPDX-License-Identifier: GPL-3.0-or-later
+//
+// Additional permission under GNU GPL version 3 section 4 and 5
+// If you modify this Program, or any covered work, by linking or combining
+// it with ArcGIS Runtime for Qt (or a modified version of that library),
+// containing parts covered by the terms of ArcGIS Runtime for Qt,
+// the licensors of this Program grant you additional permission to convey the resulting work.
+// See <https://developers.arcgis.com/qt/> for further information.
+//
 
 import QtQuick
 import QtQuick.Controls
 import Esri.UrbanHeatAnalyzer
 
 Item {
+
+    function printCamera() {
+        model.printCamera();
+    }
 
     // Create SceneQuickView here, and create its Scene etc. in C++ code
     SceneView {
