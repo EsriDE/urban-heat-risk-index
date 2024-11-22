@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 
 import arcpy
-from heat_risk_index import initialize_arcpy
+from arcgis.geometry import Envelope
+from heatri import calculate_heat_risk_index_using_extent
 
 
 class Toolbox:
@@ -19,13 +20,28 @@ class HRITool:
     def __init__(self):
         """Define the tool (tool name is the name of the class)."""
         self.label = "HRI"
-        self.description = ""
-        initialize_arcpy() 
+        self.description = "Calculates the heat risk index of an urban region."
     
 
     def getParameterInfo(self):
         """Define the tool parameters."""
-        params = None
+        params = [
+            # Extent parameter
+            arcpy.Parameter(
+                displayName="Input envelope",
+                name="in_envelope",
+                datatype="GPEnvelope",
+                parameterType="Required",
+                direction="Input"),
+
+            # Derived output spatial bins
+            arcpy.Parameter(
+                displayName="Output features",
+                name="out_features",
+                datatype="GPFeatureLayer",
+                parameterType="Derived",
+                direction="Output")
+        ]
         return params
 
     def isLicensed(self):
@@ -45,7 +61,22 @@ class HRITool:
 
     def execute(self, parameters, messages):
         """The source code of the tool."""
-        return
+        envelope = parameters[0].value
+        
+        # Get current map spatial reference
+        focus_map = arcpy.mp.ArcGISProject("current").activeMap
+        map_sr = focus_map.spatialReference
+        envelope_of_interest = Envelope({
+            "xmin": envelope.XMin,
+            "ymin": envelope.YMin,
+            "xmax": envelope.XMax,
+            "ymax": envelope.YMax,
+            "spatialReference": {
+                "wkid": map_sr.factoryCode
+            }
+        })
+        heat_risk_index_features = calculate_heat_risk_index_using_extent(envelope_of_interest)
+        parameters[1].value = heat_risk_index_features
 
     def postExecute(self, parameters):
         """This method takes place after outputs are processed and
