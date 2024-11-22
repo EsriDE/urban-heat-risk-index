@@ -36,6 +36,10 @@
 #include "FeatureQueryResult.h"
 #include "Geodatabase.h"
 #include "GeodatabaseFeatureTable.h"
+#include "Graphic.h"
+#include "GraphicListModel.h"
+#include "GraphicsOverlay.h"
+#include "GraphicsOverlayListModel.h"
 #include "LayerListModel.h"
 #include "MapTypes.h"
 #include "OrderBy.h"
@@ -44,11 +48,15 @@
 #include "Scene.h"
 #include "SceneQuickView.h"
 #include "ServiceFeatureTable.h"
+#include "SimpleFillSymbol.h"
+#include "SimpleRenderer.h"
 #include "SpatialReference.h"
 #include "Surface.h"
+#include "SymbolTypes.h"
 #include "VectorTileCache.h"
 #include "Viewpoint.h"
 
+#include <QColor>
 #include <QFuture>
 #include <QUrl>
 
@@ -59,6 +67,7 @@ using namespace Esri::ArcGISRuntime;
 UrbanHeatAnalyzer::UrbanHeatAnalyzer(QObject *parent /* = nullptr */)
     : QObject(parent)
     , m_scene(new Scene(BasemapStyle::OsmStandard, this))
+    , m_heatRiskOverlay(new GraphicsOverlay(this))
 {
     // create a new scene layer from OSM Buildings rest service
     ArcGISSceneLayer *osmSceneLayer = new ArcGISSceneLayer(
@@ -110,6 +119,17 @@ UrbanHeatAnalyzer::UrbanHeatAnalyzer(QObject *parent /* = nullptr */)
         loadHeatRiskFeatures();
     });
     m_scene->operationalLayers()->append(tiledLayer);
+
+    // define the heat risk overlay rendering
+    SimpleFillSymbol *heatRiskFillSymbol = new SimpleFillSymbol(
+        SimpleFillSymbolStyle::Solid,
+        QColor("cyan"),
+        this);
+    SimpleRenderer *heatRiskRenderer = new SimpleRenderer(
+        heatRiskFillSymbol,
+        this);
+    m_heatRiskOverlay->setRenderer(heatRiskRenderer);
+    m_heatRiskOverlay->setOpacity(0.75f);
 }
 
 UrbanHeatAnalyzer::~UrbanHeatAnalyzer() {}
@@ -130,6 +150,9 @@ void UrbanHeatAnalyzer::setSceneView(SceneQuickView *sceneView)
     m_sceneView = sceneView;
     m_sceneView->setArcGISScene(m_scene);
 
+    // add the graphics overlay
+    m_sceneView->graphicsOverlays()->append(m_heatRiskOverlay);
+
     emit sceneViewChanged();
 }
 
@@ -141,6 +164,27 @@ void UrbanHeatAnalyzer::setHeatRiskListModel(HeatRiskListModel *heatRiskListMode
     }
 
     m_heatRiskListModel = heatRiskListModel;
+    connect(m_heatRiskListModel, &HeatRiskListModel::selectedHeatRiskItemChanged, this, [this]()
+    {
+        HeatRiskAnalysisGroup *riskGroup = m_heatRiskListModel->selectedGroup();
+        if (!riskGroup)
+        {
+            return;
+        }
+
+        if (m_sceneView)
+        {
+            // Zoom to area of interest
+            Geometry areaOfInterest = riskGroup->areaOfInterest();
+            Viewpoint newViewpoint = Viewpoint(areaOfInterest);
+            m_sceneView->setViewpointAsync(newViewpoint, 2.5);
+
+            // Add a new graphic visualizing the area of interest
+            m_heatRiskOverlay->graphics()->clear();
+            Graphic *heatRiskArea = new Graphic(areaOfInterest, this);
+            m_heatRiskOverlay->graphics()->append(heatRiskArea);
+        }
+    });
 }
 
 void UrbanHeatAnalyzer::loadHeatRiskFeatures()
@@ -154,9 +198,6 @@ void UrbanHeatAnalyzer::loadHeatRiskFeatures()
         GeodatabaseFeatureTable *featureTable = gdb->geodatabaseFeatureTable("HRI_Bonn");
         connect(featureTable, &GeodatabaseFeatureTable::doneLoading, this, [featureTable, this]()
         {
-            qint64 featureCount = featureTable->numberOfFeatures();
-            qDebug() << featureCount;
-
             // Execute the analysis
             QueryParameters analysisParameters;
             QList<OrderBy> orderByFields;
@@ -168,7 +209,7 @@ void UrbanHeatAnalyzer::loadHeatRiskFeatures()
                 {
                     // Reference raw pointer
                     auto queryResult = std::unique_ptr<FeatureQueryResult>(rawQueryResult);
-                    if (queryResult && !queryResult->iterator().hasNext())
+                    if (!queryResult && !queryResult->iterator().hasNext())
                     {
                           // No results or invalid pointer
                           return;
@@ -214,6 +255,16 @@ void UrbanHeatAnalyzer::loadHeatRiskFeatures()
         featureTable->load();
     });
     gdb->load();
+}
+
+void UrbanHeatAnalyzer::clearOverlay()
+{
+    if (!m_heatRiskOverlay)
+    {
+        return;
+    }
+
+    m_heatRiskOverlay->graphics()->clear();
 }
 
 void UrbanHeatAnalyzer::printCamera()

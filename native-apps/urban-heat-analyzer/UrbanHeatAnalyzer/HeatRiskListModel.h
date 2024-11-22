@@ -20,6 +20,7 @@
 
 namespace Esri::ArcGISRuntime {
 class Feature;
+class Geometry;
 } // namespace Esri::ArcGISRuntime
 
 
@@ -32,6 +33,9 @@ public:
     double heatRiskIndex() const;
 
     void addFeature(Esri::ArcGISRuntime::Feature *heatRiskFeature);
+    Esri::ArcGISRuntime::Geometry areaOfInterest();
+
+    bool operator==(const HeatRiskAnalysisGroup &other) const;
 
 private:
     double m_heatRiskIndex;
@@ -42,6 +46,11 @@ private:
 class HeatRiskListModel : public QAbstractListModel
 {
     Q_OBJECT
+
+    Q_PROPERTY(HeatRiskAnalysisGroup *selectedGroup
+                READ selectedGroup WRITE setSelectedGroup
+                NOTIFY selectedHeatRiskItemChanged)
+
 public:
     enum HeatRiskRoles {
         NameRole = Qt::UserRole + 1,
@@ -56,11 +65,19 @@ public:
     int rowCount(const QModelIndex &parent = QModelIndex()) const;
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const;
 
+    HeatRiskAnalysisGroup *selectedGroup() const;
+
+signals:
+    void selectedHeatRiskItemChanged();
+
 protected:
     QHash<int, QByteArray> roleNames() const;
 
 private:
+    void setSelectedGroup(HeatRiskAnalysisGroup *group);
+
     QList<HeatRiskAnalysisGroup> m_analysisGroups;
+    int m_selectedIndex = -1;
 };
 
 #endif // HEATRISKLISTMODEL_H

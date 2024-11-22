@@ -26,6 +26,7 @@
 class HeatRiskListModel;
 
 namespace Esri::ArcGISRuntime {
+class GraphicsOverlay;
 class Scene;
 class SceneQuickView;
 } // namespace Esri::ArcGISRuntime
@@ -49,6 +50,7 @@ public:
     explicit UrbanHeatAnalyzer(QObject *parent = nullptr);
     ~UrbanHeatAnalyzer() override;
 
+    Q_INVOKABLE void clearOverlay();
     Q_INVOKABLE void printCamera();
 
 signals:
@@ -65,6 +67,8 @@ private:
     Esri::ArcGISRuntime::Scene *m_scene = nullptr;
     Esri::ArcGISRuntime::SceneQuickView *m_sceneView = nullptr;
     HeatRiskListModel *m_heatRiskListModel = nullptr;
+    Esri::ArcGISRuntime::GraphicsOverlay *m_heatRiskOverlay = nullptr;
+
 };
 
 #endif // URBANHEATANALYZER_H
