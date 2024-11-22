@@ -22,8 +22,7 @@ abstract class Env {
     static String placesServiceUrl = _Env.placesServiceUrl;
     @EnviedField(varName: 'PlacesSearchRadius', obfuscate: false)
     static String placesSearchRadius = _Env.placesSearchRadius;
-    @EnviedField(varName: 'PlacesCategoryDiningDrinkingId', obfuscate: false)
-    static String placesCategoryDiningDrinkingId = _Env.placesCategoryDiningDrinkingId;
-    @EnviedField(varName: 'PlacesCategoryHealthMedicineId', obfuscate: false)
-    static String placesCategoryHealthMedicineId = _Env.placesCategoryHealthMedicineId;
+    @EnviedField(varName: 'PlacesCategoryIds', obfuscate: false)
+    static String placesCategoryIds = _Env.placesCategoryIds;
+
 }
