@@ -20,6 +20,7 @@
 // See <https://developers.arcgis.com/qt/> for further information.
 //
 
+import QtQuick
 import QtQuick.Controls
 import QtQuick.Controls.Material
 import QtQuick.Layouts
@@ -39,6 +40,82 @@ ApplicationWindow {
 
     font.pixelSize: 14
 
+    header: ToolBar {
+        id: toolbar
+
+        RowLayout {
+            anchors.fill: parent
+
+            ListModel {
+                id: riskModel
+
+                ListElement {
+                    name: "Place 1"
+                    risk: 12
+                }
+                ListElement {
+                    name: "Place 2"
+                    risk: 11
+                }
+                ListElement {
+                    name: "Place 3"
+                    risk: 10
+                }
+            }
+
+            Rectangle {
+                Layout.fillWidth: true
+                Layout.fillHeight: true
+                color: Material.background
+
+                Component {
+                    id: riskDelegate
+
+                    Item {
+                        width: 200
+                        height: toolbar.height
+
+                        ColumnLayout {
+                            anchors.verticalCenter: parent.verticalCenter
+
+                            Text {
+                                Layout.alignment: Qt.AlignLeft
+                                Layout.leftMargin: 10
+                                color: Material.foreground
+                                text: "<b>Name:</b>" + name
+                            }
+                            Text {
+                                Layout.alignment: Qt.AlignLeft
+                                Layout.leftMargin: 10
+                                color: Material.foreground
+                                text: "<b>Risk:</b>" + risk
+                            }
+                        }
+
+                        MouseArea {
+                            anchors.fill: parent
+                            onClicked: {
+                                riskView.currentIndex = index;
+                                console.log(name);
+                            }
+                        }
+                    }
+                }
+
+                ListView {
+                    id: riskView
+                    anchors.fill: parent
+                    orientation: Qt.Horizontal
+
+                    model: riskModel
+                    delegate: riskDelegate
+                    highlight: Rectangle { color: Material.primary; radius: 5 }
+                    focus: false
+                }
+            }
+        }
+    }
+
     footer: ToolBar {
 
         RowLayout {
@@ -50,12 +127,6 @@ ApplicationWindow {
                 Layout.leftMargin: 15
                 Layout.fillWidth: true
                 text: qsTr("Analyzing urban heat risks...")
-            }
-
-            Button {
-                onClicked: {
-                    mapForm.printCamera();
-                }
             }
         }
     }
