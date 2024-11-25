@@ -29,6 +29,10 @@ Item {
     // Define a property for HeatRiskListModel
     property HeatRiskListModel heatRiskListModel: riskModel
 
+    function clearOverlay() {
+        model.clearOverlay();
+    }
+
     function printCamera() {
         model.printCamera();
     }

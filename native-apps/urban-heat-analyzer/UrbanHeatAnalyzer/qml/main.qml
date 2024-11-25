@@ -32,6 +32,8 @@ ApplicationWindow {
     width: 800
     height: 600
 
+    title: "Urban Heat Analyzer"
+
     Material.theme: Material.Dark
     Material.accent: "#C9F2FF"
     Material.background: "#0289C3"
@@ -65,13 +67,13 @@ ApplicationWindow {
                                 Layout.alignment: Qt.AlignLeft
                                 Layout.leftMargin: 10
                                 color: Material.foreground
-                                text: "<b>Name:</b>" + name
+                                text: "<b>Name:</b>  " + name
                             }
                             Text {
                                 Layout.alignment: Qt.AlignLeft
                                 Layout.leftMargin: 10
                                 color: Material.foreground
-                                text: "<b>Risk:</b>" + risk
+                                text: "<b>Risk:</b>  " + risk
                             }
                         }
 
@@ -79,7 +81,7 @@ ApplicationWindow {
                             anchors.fill: parent
                             onClicked: {
                                 riskView.currentIndex = index;
-                                console.log(name);
+                                mapForm.heatRiskListModel.select(index);
                             }
                         }
                     }
@@ -94,6 +96,13 @@ ApplicationWindow {
                     delegate: riskDelegate
                     highlight: Rectangle { color: Material.primary; radius: 5 }
                     focus: false
+                }
+            }
+
+            ToolButton {
+                text: qsTr("Clear")
+                onClicked: {
+                    mapForm.clearOverlay();
                 }
             }
         }
