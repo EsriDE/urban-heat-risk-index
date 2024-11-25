@@ -24,6 +24,8 @@
 #include "UrbanHeatAnalyzer.h"
 
 #include "ArcGISRuntimeEnvironment.h"
+#include "CoreTypes.h"
+#include "LicenseResult.h"
 #include "SceneQuickView.h"
 
 #include <QDir>
@@ -61,6 +63,7 @@ int main(int argc, char *argv[])
     // 2. API key authentication: Get a long-lived access token that gives your application access to
     // ArcGIS location services. Go to the tutorial at https://links.esri.com/create-an-api-key.
     // Copy the API Key access token.
+#ifdef QT_DEBUG
     QString accessToken;
     QString apiKeyName = "ARCGIS_API_KEY";
     QProcessEnvironment systemEnvironment = QProcessEnvironment::systemEnvironment();
@@ -79,12 +82,24 @@ int main(int argc, char *argv[])
     {
         ArcGISRuntimeEnvironment::setApiKey(accessToken);
     }
+#else
+    ArcGISRuntimeEnvironment::setApiKey("API KEY");
 
     // Production deployment of applications built with ArcGIS Maps SDK requires you to
     // license ArcGIS Maps SDK functionality. For more information see
     // https://links.esri.com/arcgis-runtime-license-and-deploy.
 
-    // ArcGISRuntimeEnvironment::setLicense("Place license string in here");
+    LicenseResult licenseResult = ArcGISRuntimeEnvironment::setLicense("Place license string in here");
+    switch (licenseResult.licenseStatus())
+    {
+    case LicenseStatus::Valid:
+        break;
+
+    default:
+        qWarning()
+            << "You need a runtime deployment license!";
+    }
+#endif
 
     // Register the scene view for QML
     qmlRegisterType<SceneQuickView>("Esri.UrbanHeatAnalyzer", 1, 0, "SceneView");
