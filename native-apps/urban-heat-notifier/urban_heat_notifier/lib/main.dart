@@ -236,7 +236,7 @@ class _MapScreenState extends State<MapScreen> {
       };
 
       Uri iconUri = Uri.parse(result['icon']['url']);
-      PictureMarkerSymbol symbol = PictureMarkerSymbol.withUrl(iconUri);
+      PictureMarkerSymbol symbol = PictureMarkerSymbol.withUri(iconUri);
       symbol.width = 30;
       symbol.height = 30;
 
@@ -259,7 +259,7 @@ class _MapScreenState extends State<MapScreen> {
         _dwFeatureLayer.featureTable as ServiceFeatureTable;
 
     final queryResult = await sfTable.queryFeatures(
-      parameters: queryParameters,
+      queryParameters
     );
 
     var whereClause = '';
@@ -319,7 +319,7 @@ class _MapScreenState extends State<MapScreen> {
         itemId: Env.hriFeatureServicePortalItemID);
 
     _hriFeatureLayer =
-        FeatureLayer.withItem(featureServiceItem: portalItem, layerId: 0);
+        FeatureLayer.withItem(item: portalItem, layerId: 0);
     _hriFeatureLayer.definitionExpression = "hri >= 9";
     _hriFeatureLayer.opacity = .4;
     map.operationalLayers.add(_hriFeatureLayer);
@@ -337,7 +337,7 @@ class _MapScreenState extends State<MapScreen> {
         itemId: Env.drinkingWaterFeatureServicePortalItemID);
 
     _dwFeatureLayer =
-        FeatureLayer.withItem(featureServiceItem: portalItem, layerId: 0);
+        FeatureLayer.withItem(item: portalItem, layerId: 0);
     _dwFeatureLayer.isVisible = false;
     map.operationalLayers.add(_dwFeatureLayer);
 
@@ -386,12 +386,12 @@ class _MapScreenState extends State<MapScreen> {
           parameters: queryParameters,
           queryFeatureFields: QueryFeatureFields.loadAll);
 
-      if (!queryResult.features().isEmpty) {
+      if (queryResult.features().isNotEmpty) {
         final locationFeature = queryResult.features().first;
 
         _currentLocationFeature = locationFeature;
         if (_switchValue) {
-          _hriFeatureLayer.selectFeature(feature: locationFeature);
+          _hriFeatureLayer.selectFeature(locationFeature);
         }
 
         setState(() {

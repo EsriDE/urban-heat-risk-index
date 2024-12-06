@@ -2,43 +2,23 @@
 
 ## Overview
 
-This project is based on the ArcGIS Maps SDK for Flutter (Beta 2) and ArcGIS Location Platform. Users will be notified when they are in a heat-risk area. They can display POIs with options for cooling down/drinking or where they can get help and can navigate there with a compass.
+This project is based on the ArcGIS Maps SDK for Flutter 200.6 and ArcGIS Location Platform. Users will be notified when they are in a heat-risk area. They can display POIs with options for cooling down/drinking or where they can get help and can navigate there with a compass.
 
 ## Getting Started
 
 To build this app, you will require the following:
 
-1. Install Flutter: Follow the instructions on the Flutter documentation [get started guide](https://docs.flutter.dev/get-started/install). Xcode and Android Studio are required for their respective platforms, and Visual Studio Code is the recommended IDE.
-
-2. Download the ArcGIS Maps SDK for Flutter beta: Access the beta by registering on Esri’s [Early Adopter website](https://earlyadopter.esri.com/project/home.html?cap=%7Bdd2444fc-5d36-44bb-8384-4a56046b9580%7D). Refer to the documentation there on how to get started.
-
-3. API key: You will require an API key access token to authenticate the basemap services used in this application. Learn how to create one on the Esri [Developers website](https://developers.arcgis.com/documentation/security-and-authentication/api-key-authentication/tutorials/create-an-api-key/)
+https://developers.arcgis.com/flutter/get-started/
 
 
-Step 1: Download ArcGIS Maps SDK for Flutter Beta 2
-
-Unpack the arcgis_maps_package archive into the same parent directory as your app:
-
-parent_directory
-   |
-   |__ urban_heat_notifier
-   |
-   |__ arcgis_maps_package
-
+Step 1: Get the SDK and dependencies
 
 Navigate to the `urban_heat_notifier` directory.
 
-```
-cd urban_heat_notifier
-```
+Run: dart pub add arcgis_maps
+Run: flutter pub upgrade
+Run: dart run arcgis_maps install
 
-Use `flutter pub upgrade` to configure the dependencies.
-Use `dart run arcgis_maps install` to install arcgis_maps_core.
-
-```
-flutter pub upgrade
-dart run arcgis_maps install
-```
 
 Step 2: Configure environment variables (based on [ENVied](https://pub.dev/packages/envied))
 
